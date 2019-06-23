@@ -38,6 +38,12 @@ pre[class*="language-"] {
   width: 45vw;
 }
 
+@media (max-width: 500px) {
+  .pre[class*="language-"] {
+    width: 80vw;
+  }
+}
+
 :not(pre) > code[class*="language-"],
 pre[class*="language-"] {
   background: #2d2d2d;
