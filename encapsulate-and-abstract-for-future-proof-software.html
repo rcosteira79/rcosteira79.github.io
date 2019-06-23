@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Document Settings -->
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Base Meta -->
+    <!-- dynamically fixing the title for tag/author pages -->
+ 
+
+
+    <title>
+      
+      Encapsulate and abstract for future proof software
+      
+    </title>
+
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Styles'n'Scripts -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/assets/built/screen.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/assets/built/screen.edited.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto+Slab:700|Roboto:300,400&display=swap"
+      rel="stylesheet"
+    />
+    <!--[if IE]>
+      <style>
+        p,
+        ol,
+        ul {
+          width: 100%;
+        }
+        blockquote {
+          width: 100%;
+        }
+      </style>
+    <![endif]-->
+
+    <!-- This tag outputs SEO meta+structured data and other important settings -->
+    <meta name="description" content="A mobile software engineer with a passion for Android and clean, maintainable code. I build apps from the ground up and maintain existing ones. Currently out of my area of expertise in order to diversify my skills on software design and architecture." />
+    <link rel="shortcut icon" href="http://localhost:4000/assets/images/favicon.png" type="image/png" />
+    <link rel="canonical" href="http://localhost:4000/encapsulate-and-abstract-for-future-proof-software" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+
+     <!--title below is coming from _includes/dynamic_title-->
+    <meta property="og:site_name" content="Ricardo Costeira" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Encapsulate and abstract for future proof software" />
+    <meta property="og:description" content="Change will always affect your software. No matter the domain, the uses cases, the developers, or even the users. Change is the one constant in software development. This is one of the first topics addressed by the authors of the renowned Head First Design Patterns. They approach it as one" />
+    <meta property="og:url" content="http://localhost:4000/encapsulate-and-abstract-for-future-proof-software" />
+    <meta property="og:image" content="http://localhost:4000/assets/images/encapsulate-and-abstract-for-future-proof-software.jpg" />
+    <meta property="article:publisher" content="https://www.twitter.com/rcosteira79" />
+    <meta property="article:author" content="https://www.twitter.com/rcosteira79" />
+    <meta property="article:published_time" content="2019-04-22T11:00:00+01:00" />
+    <meta property="article:modified_time" content="2019-04-22T11:00:00+01:00" />
+    <meta property="article:tag" content="Android" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Encapsulate and abstract for future proof software" />
+    <meta name="twitter:description" content="Change will always affect your software. No matter the domain, the uses cases, the developers, or even the users. Change is the one constant in software development. This is one of the first topics addressed by the authors of the renowned Head First Design Patterns. They approach it as one" />
+    <meta name="twitter:url" content="http://localhost:4000/" />
+    <meta name="twitter:image" content="http://localhost:4000/assets/images/encapsulate-and-abstract-for-future-proof-software.jpg" />
+    <meta name="twitter:label1" content="Written by" />
+    <meta name="twitter:data1" content="Ricardo Costeira" />
+    <meta name="twitter:label2" content="Filed under" />
+    <meta name="twitter:data2" content="Android" />
+    <meta name="twitter:site" content="@rcosteira79" />
+    <meta name="twitter:creator" content="@rcosteira79" />
+    <meta property="og:image:width" content="1400" />
+    <meta property="og:image:height" content="933" />
+
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Website",
+    "publisher": {
+        "@type": "Organization",
+        "name": "Ricardo Costeira",
+        "logo": "http://localhost:4000/"
+    },
+    "url": "http://localhost:4000/encapsulate-and-abstract-for-future-proof-software",
+    "image": {
+        "@type": "ImageObject",
+        "url": "http://localhost:4000/assets/images/encapsulate-and-abstract-for-future-proof-software.jpg",
+        "width": 2000,
+        "height": 666
+    },
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "http://localhost:4000/encapsulate-and-abstract-for-future-proof-software"
+    },
+    "description": "Change will always affect your software. No matter the domain, the uses cases, the developers, or even the users. Change is the one constant in software development. This is one of the first topics addressed by the authors of the renowned Head First Design Patterns. They approach it as one"
+}
+    </script>
+
+    <!-- <script type="text/javascript" src="https://demo.ghost.io/public/ghost-sdk.min.js?v=724281a32e"></script>
+    <script type="text/javascript">
+    ghost.init({
+    	clientId: "ghost-frontend",
+    	clientSecret: "f84a07a72b17"
+    });
+    </script> -->
+
+    <meta name="generator" content="Jekyll 3.6.2" />
+    <link rel="alternate" type="application/rss+xml" title="Encapsulate and abstract for future proof software" href="/feed.xml" />
+
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/assets/built/prism.css"
+    />
+  </head>
+  <body
+    class="post-template"
+  >
+    <div class="site-wrapper">
+      <!-- All the main content gets inserted here, index.hbs, post.hbs, etc -->
+      <!-- default -->
+
+<!-- The tag above means: insert everything in this file
+into the {body} of the default.hbs template -->
+
+<header class="site-header outer">
+    <div class="inner">
+        <nav class="site-nav">
+  <div class="site-nav-left">
+     <ul class="nav" role="menu">
+    <li class="nav-home" role="menuitem"><a href="/">Home</a></li>
+    <li class="nav-getting-started" role="menuitem"><a href="/tag/android/">Android</a></li>
+    <li class="nav-about" role="menuitem"><a href="/about/">About</a></li>
+</ul>
+ 
+  </div>
+  <div class="site-nav-right">
+    <div class="social-links">
+      
+      <a
+        class="social-link social-link-gh"
+        href="https://github.com/rcosteira79"
+        target="_blank"
+        rel="noopener"
+        ><svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a
+      >
+       
+      
+      <a
+        class="social-link social-link-tw"
+        href="https://twitter.com/rcosteira79"
+        target="_blank"
+        rel="noopener"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M30.063 7.313c-.813 1.125-1.75 2.125-2.875 2.938v.75c0 1.563-.188 3.125-.688 4.625a15.088 15.088 0 0 1-2.063 4.438c-.875 1.438-2 2.688-3.25 3.813a15.015 15.015 0 0 1-4.625 2.563c-1.813.688-3.75 1-5.75 1-3.25 0-6.188-.875-8.875-2.625.438.063.875.125 1.375.125 2.688 0 5.063-.875 7.188-2.5-1.25 0-2.375-.375-3.375-1.125s-1.688-1.688-2.063-2.875c.438.063.813.125 1.125.125.5 0 1-.063 1.5-.25-1.313-.25-2.438-.938-3.313-1.938a5.673 5.673 0 0 1-1.313-3.688v-.063c.813.438 1.688.688 2.625.688a5.228 5.228 0 0 1-1.875-2c-.5-.875-.688-1.813-.688-2.75 0-1.063.25-2.063.75-2.938 1.438 1.75 3.188 3.188 5.25 4.25s4.313 1.688 6.688 1.813a5.579 5.579 0 0 1 1.5-5.438c1.125-1.125 2.5-1.688 4.125-1.688s3.063.625 4.188 1.813a11.48 11.48 0 0 0 3.688-1.375c-.438 1.375-1.313 2.438-2.563 3.188 1.125-.125 2.188-.438 3.313-.875z"/></svg>
+</a
+      >
+      
+      
+      <a
+        class="social-link social-link-lkd"
+        href="https://linkedin.com/in/rcosteira"
+        target="_blank"
+        rel="noopener"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/></svg></a
+      >
+      
+    </div>
+    
+  </div>
+</nav>
+
+    </div>
+</header>
+
+<!-- Everything inside the #post tags pulls data from the post -->
+<!-- #post -->
+
+<main id="site-main" class="site-main outer" role="main">
+    <div class="inner">
+
+        <article class="post-full post tag-android ">
+
+            <header class="post-full-header">
+                <section class="post-full-meta">
+                    <time class="post-full-meta-date" datetime="22 April 2019">22 April 2019</time>
+                    
+                        <span class="date-divider">/</span>
+                        
+                            
+                               <a href='/tag/android/'>ANDROID</a>
+                            
+                        
+                    
+                </section>
+                <h1 class="post-full-title">Encapsulate and abstract for future proof software</h1>
+                
+                    <h2 class="post-full-subtitle">Change is coming</h2>
+                
+            </header>
+
+            
+            <div class="post-full-image-caption">
+                <figure class="post-full-image" style="background-image: url(/assets/images/encapsulate-and-abstract-for-future-proof-software.jpg)"></figure>
+                
+                    Things change. Even if you don’t want them to. 
+                
+                
+                    
+                     Photo by <a href="https://unsplash.com/@bwtobias">bennett tobias</a>
+                    
+                
+
+                
+                    
+                        on <a href="https://unsplash.com">Unsplash</a>.
+                    
+                
+            </div>
+            
+
+            <section class="post-full-content">
+                <div class="kg-card-markdown">
+                    <p>Change will always affect your software. No matter the domain, the uses cases, the developers, or even the users. Change is the one constant in software development.</p>
+
+<p>This is one of the first topics addressed by the authors of the renowned <a href="http://shop.oreilly.com/product/9780596007126.do">Head First Design Patterns</a>. They approach it as one reason for the importance of design patterns. As they say in the book:</p>
+
+<blockquote>
+  <p>“No matter how well you design an application, over time an application must grow and change or it will <em>die</em>.”</p>
+</blockquote>
+
+<p>Along with design patterns, the authors also introduce a bundle of design principles. While the patterns are outside the scope of this article, I want to focus on the first two principles:</p>
+
+<ul>
+  <li><strong>Encapsulate what varies.</strong></li>
+  <li><strong>Program to interfaces, not implementations.</strong></li>
+</ul>
+
+<p>The first principle is the basis for all design patterns, and most of them also make use of the second one. The first one dictates that if you have code that keeps changing, pull it out and isolate it. The second principle complements this through the use of interfaces.</p>
+
+<p>Now, a word of caution. As <a href="https://medium.com/@techyourchance">Vasiliy Zukanov</a> explained in <a href="https://medium.com/@techyourchance/i-havent-read-head-first-design-patterns-yet-but-i-heard-that-it-s-a-worthy-book-b53f72e9b495">this comment</a>, this “interface” does not refer to the interface construct seen in some OOP languages. Well, it can refer to it, but it has a broader meaning. Here, “interface” refers to a component’s external point of interaction. It is what other components can use to interact with the specific component. So, this “interface” can be an interface, an abstract class, a normal class or even a function. It can be anything as long as it serves as a communication point with the component. With it, we need not know the inner details of the component. It lets us <strong>abstract</strong> from the component’s implementation. So, whenever there’s a change, you only need to refactor the corresponding code. The outside code will never even notice it. The purpose of the principle is indeed to focus on <strong>what</strong> the code does, and not <strong>how</strong> it does it.</p>
+
+<h3 id="a-ticking-time-bomb-android-libraries">A ticking time bomb: Android Libraries</h3>
+
+<p>The Android open source community is awesome. No matter the complexity of what you need, a library implementing it is likely to exist already. This not only makes our jobs easier but also lets us focus on the true business logic problems.</p>
+
+<p>Yet, things change (I know). Libraries become obsolete. Sometimes, new versions introduce breaking changes. Requirements change, and we no longer need a library. External changes force us to change our code. We’re left with a huge codebase full of deprecated dependencies or code built around them. This is where the design principles mentioned above come in handy.</p>
+
+<p>Suppose that you need to store/retrieve a Configuration object on/from disk in JSON format. You have experience with Gson from previous projects, so you use it. You defined Configuration as:</p>
+
+<pre><code class="language-kotlin">data class Configuration(
+  val aNumber: Int,
+  val somethingWithCharacters: String)
+</code></pre>
+
+<p>You first start by creating an abstraction for Gson. Here, a simple class will do (unless you’re using <a href="http://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">Clean Architecture</a>: in that case, you would probably have this class implement an interface):</p>
+
+<pre><code class="language-kotlin">/** Imports */
+
+class ConfigurationStorageHandler {
+
+  private val gson: Gson
+
+  // ...
+
+  fun read(): Configuration {
+    val jsonConfiguration = /** Get json string from disk */
+    return gson.fromJson(jsonConfiguration, Configuration::class.java)
+  }
+
+  fun write(configuration: Configuration) {
+    val jsonString = gson.toJson(configuration)
+    /** Store jsonString on disk */
+  }
+}
+</code></pre>
+
+<p>Then, you use it along with the rest of your product:</p>
+
+<pre><code class="language-kotlin">class MagicBusiness constructor(
+  private val configurationStorageHandler: ConfigurationStorageHandler
+) {
+  // ...
+
+  fun doMagicAccordingToConfig() {
+    val config = configurationStorageHandler.read()
+    /** use config for magic */
+  }
+
+  fun saveConfigForLateNightMagic(configuration: Configuration) {
+    /** 10x programmer magic */
+
+    configurationStorageHandler.write(configuration)
+  }
+}
+</code></pre>
+
+<pre><code class="language-kotlin">class MagicActivity : AppCompatActivity() {
+
+  // ...
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    // ...
+    val storageHandler = ConfigurationStorageHandler()
+    val magicBusiness = MagicBusiness(
+      configurationStorageHandler = storageHandler
+    )
+    // ...
+  }
+
+  // ...
+}
+</code></pre>
+
+<p>Time goes by, and your abstraction gets sprinkled throughout your code. One day, you come across this hip library called Moshi, that also deals with json parsing. Moshi seems to be faster, more flexible, and works like a charm when used together with Retrofit. You got to use it.</p>
+
+<p>Luckily, you saw this coming. You use Gson everywhere in your code. But since you have it encapsulated, you can swap it with Moshi almost for free!</p>
+
+<p>Simply replace Gson with Moshi:</p>
+
+<pre><code class="language-kotlin">/** Imports */
+
+class ConfigurationStorageHandler {
+
+  private val moshi: Moshi
+
+  // ...
+
+  fun read(): Configuration {
+    val jsonConfiguration = /** Get json string from disk */
+    val adapter = moshi.adapter(Configuration::class.java)
+
+    return adapter.fromJson(jsonConfiguration)
+  }
+
+  fun write(configuration: Configuration) {
+    val adapter = moshi.adapter(Configuration::class.java)
+    val jsonString = adapter.toJson(configuration)
+    /** Store jsonString on disk */
+  }
+}
+</code></pre>
+
+<p>And you’re done — all the code that used Gson now uses Moshi. Just by changing this class.</p>
+
+<p>You can later change libraries again. You can even ditch json and use something else. As long as you create the proper abstraction (which is actually the hard part), you’re good to go. Your code is now robust and flexible, and your future self will be proud.</p>
+
+<p>Note that the codebase is further improved by injecting the dependencies. Even if you don’t use Dagger or any other framework — the dependency injection itself is what matters. This way, you keep your classes decoupled and set yourself up for easy testing. Here, if you inject a mock or fake storage handler, you can test <code>MagicBusiness</code> in isolation.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<blockquote>
+  <p>“Abstractions Live Longer than Details“ — The Pragmatic Programmer, chapter 7, page 209</p>
+</blockquote>
+
+<p>I showed you an example of how you can create boundaries around your code. These boundaries protect your code from external dependencies. Still, it goes much deeper than this. Recipes like design patterns or architectural patterns such as Clean Architecture are great. They’re battle tested, and their usefulness is more than proven. Using these design principles is one reason for their greatness. You can (and should!) apply these design principles even if you don’t use external code. Use them with caution, though. We know that design principle abuse increases code complexity. It’s a commitment you must consider, and balance with care.</p>
+
+                </div>
+            </section>
+
+            <!-- Email subscribe form at the bottom of the page -->
+            
+
+            <footer class="post-full-footer">
+                <!-- Everything inside the #author tags pulls data from the author -->
+                <!-- #author-->
+                <!-- 
+                    
+                        <section class="author-card">
+                            
+                            <section class="author-card-content">
+                                <h4 class="author-card-name"><a href="/author/ricardo">Ricardo Costeira</a></h4>
+                                
+                                    <p>Read <a href="/author/ricardo">more posts</a> by this author.</p>
+                                
+                            </section>
+                        </section>
+                        <div class="post-full-footer-right">
+                            <a class="author-card-button" href="/author/ricardo">Read More</a>
+                        </div>
+                    
+                 -->
+                <!-- /author  -->
+            </footer>
+
+            <!-- If you use Disqus comments, just uncomment this block.
+            The only thing you need to change is "test-apkdzgmqhj" - which
+            should be replaced with your own Disqus site-id. -->
+            
+                <section class="post-full-comments">
+                    <div id="disqus_thread"></div>
+                    <script>
+                        var disqus_config = function () {
+                            this.page.url = 'http://localhost:4000/';
+                            this.page.identifier = 'Ricardo Costeira';
+                        };
+                        (function() {
+                            var d = document, s = d.createElement('script');
+                            s.src = 'https://ricardo_costeira.disqus.com/embed.js';
+                            s.setAttribute('data-timestamp', +new Date());
+                            (d.head || d.body).appendChild(s);
+                        })();
+                    </script>
+                </section>
+            
+
+        </article>
+
+    </div>
+</main>
+
+<!-- Links to Previous/Next posts -->
+<aside class="read-next outer">
+    <div class="inner">
+        <div class="read-next-feed">
+            
+                
+                
+                
+                
+                    <article class="read-next-card"
+                        
+                            style="background-image: url(/assets/images/cover.jpeg)"
+                        
+                    >
+                        <header class="read-next-card-header">
+                            <small class="read-next-card-header-sitetitle">&mdash; Ricardo Costeira &mdash;</small>
+                            
+                                <h3 class="read-next-card-header-title"><a href="/tag/android/">Android</a></h3>
+                            
+                        </header>
+                        <div class="read-next-divider"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 14.5s2 3 5 3 5.5-2.463 5.5-5.5S21 6.5 18 6.5c-5 0-7 11-12 11C2.962 17.5.5 15.037.5 12S3 6.5 6 6.5s4.5 3.5 4.5 3.5"/></svg>
+</div>
+                        <div class="read-next-card-content">
+                            <ul>
+                                
+                                
+                                  
+                                    
+                                        
+                                        
+                                            <li><a href="/how-not-to-use-sealed-classes-and-livedata-for-state-management">How not to use sealed classes and LiveData for state management</a></li>
+                                        
+                                    
+                                  
+                                
+                                  
+                                    
+                                  
+                                
+                            </ul>
+                        </div>
+                        <footer class="read-next-card-footer">
+                            <a href="/tag/android/">
+                                
+                                
+                                    1 post  →
+                                
+                            </a>
+                        </footer>
+                    </article>
+                
+            
+
+            <!-- If there's a next post, display it using the same markup included from - partials/post-card.hbs -->
+            
+                
+
+    <article class="post-card post-template">
+        
+            <a class="post-card-image-link" href="/how-not-to-use-sealed-classes-and-livedata-for-state-management">
+                <div class="post-card-image" style="background-image: url(/assets/images/how-not-to-use-sealed-classes-and-livedata-for-state-management.jpg)"></div>
+            </a>
+        
+        <div class="post-card-content">
+            <a class="post-card-content-link" href="/how-not-to-use-sealed-classes-and-livedata-for-state-management">
+                <header class="post-card-header">
+                    
+                        
+                            
+                                <span class="post-card-tags">Android</span>
+                            
+                        
+                    
+
+                    <h2 class="post-card-title">How not to use sealed classes and LiveData for state management</h2>
+                </header>
+                <section class="post-card-excerpt">
+                    
+                        <p>A few months ago, I was washing my dishes while listening to episode 148 of the Fragmented podcast. In this episode, Donn Felker and Kaushik Gopal talk about architecture. To be specific, about</p>
+                    
+                </section>
+            </a>
+            <footer class="post-card-meta">
+                <!-- 
+                    
+                        
+                        <span class="post-card-author">
+                            <a href="/author/ricardo/">Ricardo Costeira</a>
+                        </span>
+                    
+                 -->
+                <span class="reading-time">
+                    
+                    
+                      9 min read
+                    
+                </span>
+            </footer>
+        </div>
+    </article>
+
+            
+
+            <!-- If there's a previous post, display it using the same markup included from - partials/post-card.hbs -->
+            
+
+        </div>
+    </div>
+</aside>
+
+<!-- Floating header which appears on-scroll, included from includes/floating-header.hbs -->
+<div class="floating-header">
+  <div class="floating-header-logo">
+    <a href="http://localhost:4000/">
+      
+      <img
+        src="/assets/images/favicon.png"
+        alt="Ricardo Costeira icon"
+      />
+      
+      <span>Ricardo Costeira</span>
+    </a>
+  </div>
+  <span class="floating-header-divider">&mdash;</span>
+  <div class="floating-header-title">Encapsulate and abstract for future proof software</div>
+  <div class="floating-header-share">
+    <div class="floating-header-share-label">Share</div>
+    <a
+      class="floating-header-share-tw"
+      href="https://twitter.com/share?text=Encapsulate+and+abstract+for+future+proof+software&amp;url=https://ricardocosteira.com/encapsulate-and-abstract-for-future-proof-software"
+      onclick="window.open(this.href, 'share-twitter', 'width=550,height=235');return false;"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M30.063 7.313c-.813 1.125-1.75 2.125-2.875 2.938v.75c0 1.563-.188 3.125-.688 4.625a15.088 15.088 0 0 1-2.063 4.438c-.875 1.438-2 2.688-3.25 3.813a15.015 15.015 0 0 1-4.625 2.563c-1.813.688-3.75 1-5.75 1-3.25 0-6.188-.875-8.875-2.625.438.063.875.125 1.375.125 2.688 0 5.063-.875 7.188-2.5-1.25 0-2.375-.375-3.375-1.125s-1.688-1.688-2.063-2.875c.438.063.813.125 1.125.125.5 0 1-.063 1.5-.25-1.313-.25-2.438-.938-3.313-1.938a5.673 5.673 0 0 1-1.313-3.688v-.063c.813.438 1.688.688 2.625.688a5.228 5.228 0 0 1-1.875-2c-.5-.875-.688-1.813-.688-2.75 0-1.063.25-2.063.75-2.938 1.438 1.75 3.188 3.188 5.25 4.25s4.313 1.688 6.688 1.813a5.579 5.579 0 0 1 1.5-5.438c1.125-1.125 2.5-1.688 4.125-1.688s3.063.625 4.188 1.813a11.48 11.48 0 0 0 3.688-1.375c-.438 1.375-1.313 2.438-2.563 3.188 1.125-.125 2.188-.438 3.313-.875z"/></svg>
+
+    </a>
+    <a
+      class="floating-header-share-fb"
+      href="https://www.facebook.com/sharer/sharer.php?u=https://ricardocosteira.com/encapsulate-and-abstract-for-future-proof-software"
+      onclick="window.open(this.href, 'share-facebook','width=580,height=296');return false;"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M19 6h5V0h-5c-3.86 0-7 3.14-7 7v3H8v6h4v16h6V16h5l1-6h-6V7c0-.542.458-1 1-1z"/></svg>
+    </a>
+  </div>
+  <progress class="progress" value="0">
+    <div class="progress-container">
+      <span class="progress-bar"></span>
+    </div>
+  </progress>
+</div>
+
+
+<!-- /post -->
+
+<!-- The #contentFor helper here will send everything inside it up to the matching #block helper found in default.hbs -->
+
+
+      <!-- Previous/next page links - displayed on every page -->
+      
+
+      <!-- The footer at the very bottom of the screen -->
+      <footer class="site-footer outer">
+        <div class="site-footer-content inner">
+          <section class="copyright">
+            <a href="http://localhost:4000/">Ricardo Costeira</a>
+            &copy; 2019
+          </section>
+          <section class="poweredby">
+            Proudly published with <a href="https://jekyllrb.com/">Jekyll</a> &
+            <a href="https://pages.github.com/" target="_blank" rel="noopener"
+              >GitHub Pages</a
+            >. Based on
+            <a
+              href="https://github.com/jekyller/jasper2"
+              target="_blank"
+              rel="noopener"
+              >Jasper2</a
+            >
+          </section>
+          <nav class="site-footer-nav">
+            <a href="/">Latest Posts</a>
+            <a
+              href="https://github.com/rcosteira79"
+              target="_blank"
+              rel="noopener"
+              >Github</a
+            > <a
+              href="https://twitter.com/rcosteira79"
+              target="_blank"
+              rel="noopener"
+              >Twitter</a
+            > <a
+              href="https://linkedin.com/in/rcosteira"
+              target="_blank"
+              rel="noopener"
+              >Linkedin</a
+            >
+          </nav>
+        </div>
+        <script src="/assets/js/prism.js"></script>
+        <script src="/assets/js/prism-line-numbers.js"></script>
+      </footer>
+    </div>
+
+    <!-- The big email subscribe modal content -->
+    
+
+    <!-- highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.10.0/components/prism-abap.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        $("pre code").each(function(i, block) {
+          hljs.highlightBlock(block);
+        });
+      });
+    </script>
+
+    <!-- jQuery + Fitvids, which makes all video embeds responsive -->
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.min.js"
+      integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      type="text/javascript"
+      src="/assets/js/jquery.fitvids.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://demo.ghost.io/assets/js/jquery.fitvids.js?v=724281a32e"
+    ></script>
+
+    <!-- Paginator increased to "infinit" in _config.yml -->
+    <!-- if paginator.posts  -->
+    <!-- <script>
+        var maxPages = parseInt('');
+    </script>
+    <script src="/assets/js/infinitescroll.js"></script> -->
+    <!-- /endif -->
+
+    
+
+    <!-- Add Google Analytics  -->
+    <!-- Google Analytics Tracking code -->
+ <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-142536212-1', 'auto');
+  ga('send', 'pageview');
+
+ </script>
+
+
+    <!-- The #block helper will pull in data from the #contentFor other template files. In this case, there's some JavaScript which we only want to use in post.hbs, but it needs to be included down here, after jQuery has already loaded. -->
+     <script>
+
+// NOTE: Scroll performance is poor in Safari
+// - this appears to be due to the events firing much more slowly in Safari.
+//   Dropping the scroll event and using only a raf loop results in smoother
+//   scrolling but continuous processing even when not scrolling
+$(document).ready(function () {
+    // Start fitVids
+    var $postContent = $(".post-full-content");
+    $postContent.fitVids();
+    // End fitVids
+
+    var progressBar = document.querySelector('progress');
+    var header = document.querySelector('.floating-header');
+    var title = document.querySelector('.post-full-title');
+
+    var lastScrollY = window.scrollY;
+    var lastWindowHeight = window.innerHeight;
+    var lastDocumentHeight = $(document).height();
+    var ticking = false;
+
+    function onScroll() {
+        lastScrollY = window.scrollY;
+        requestTick();
+    }
+
+    function onResize() {
+        lastWindowHeight = window.innerHeight;
+        lastDocumentHeight = $(document).height();
+        requestTick();
+    }
+
+    function requestTick() {
+        if (!ticking) {
+            requestAnimationFrame(update);
+        }
+        ticking = true;
+    }
+
+    function update() {
+        var trigger = title.getBoundingClientRect().top + window.scrollY;
+        var triggerOffset = title.offsetHeight + 35;
+        var progressMax = lastDocumentHeight - lastWindowHeight;
+
+        // show/hide floating header
+        if (lastScrollY >= trigger + triggerOffset) {
+            header.classList.add('floating-active');
+        } else {
+            header.classList.remove('floating-active');
+        }
+
+        progressBar.setAttribute('max', progressMax);
+        progressBar.setAttribute('value', lastScrollY);
+
+        ticking = false;
+    }
+
+    window.addEventListener('scroll', onScroll, {passive: true});
+    window.addEventListener('resize', onResize, false);
+
+    update();
+});
+</script>
+ 
+
+    <!-- Ghost outputs important scripts and data with this tag - it should always be the very last thing before the closing body tag -->
+    <!-- ghost_foot -->
+  </body>
+</html>
