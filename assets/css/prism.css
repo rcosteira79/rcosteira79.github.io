@@ -35,12 +35,17 @@ pre[class*="language-"] {
   margin: 0.5em 0 2em;
   overflow: auto;
   align-items: center;
-  width: 45vw;
+  width: 55vw;
 }
 
-@media (max-width: 500px) {
-  .pre[class*="language-"] {
-    width: 80vw;
+@media (max-width: 1170px) {
+  pre[class*="language-"] {
+    width: 75vw;
+  }
+}
+@media (max-width: 800px) {
+  pre[class*="language-"] {
+    width: 90vw;
   }
 }
 
