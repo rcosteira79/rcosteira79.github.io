@@ -4,7 +4,7 @@
   <generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator>
   <link href="https://ricardocosteira.com/tag/android/feed.xml" rel="self" type="application/atom+xml" />
   <link href="https://ricardocosteira.com/" rel="alternate" type="text/html" />
-  <updated>2019-06-24T00:38:44+01:00</updated>
+  <updated>2019-08-10T12:44:03+01:00</updated>
   <id>https://ricardocosteira.com/tag/android/feed.xml</id>
 
   
@@ -248,7 +248,7 @@ val newState = oldState.copy(
 
 &lt;p&gt;You can find all the code (in its final state) in my &lt;a href=&quot;https://github.com/rcosteira79/AndroidMultiModuleCleanArchTemplate&quot;&gt;multi module clean architecture template&lt;/a&gt;, in the &lt;code&gt;RecyclerViewExample&lt;/code&gt; module.&lt;/p&gt;
 
-&lt;p&gt;As I said before, this is not an architecture recommendation. While this might work for some cases, other alternatives such as databinding or multiple LiveData variables managed by a MediatorLiveData (as suggested by Gabor Varadi in the comments) might even be a better fit. I’m a fan of this approach, but it’s up to you to figure out what’s best for your specific case.&lt;/p&gt;
+&lt;p&gt;As I said before, this is not an architecture recommendation. While this might work for some cases, other alternatives such as databinding or multiple LiveData variables managed by a MediatorLiveData (&lt;a href=&quot;https://medium.com/@Zhuinden/if-there-are-many-events-id-just-combine-them-together-with-a-mediatorlivedata-or-with-rx-a0494953a578&quot;&gt;as suggested by Gabor Varadi&lt;/a&gt;) might even be a better fit. I’m a fan of this approach, but it’s up to you to figure out what’s best for your specific case.&lt;/p&gt;
 
 &lt;hr /&gt;
 
