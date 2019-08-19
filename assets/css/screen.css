@@ -1973,3 +1973,15 @@ Usage (In Ghost editor):
     margin-left: 0;
   }
 }
+
+figure {
+  text-align: center;
+  font-style: italic;
+  font-size: smaller;
+  text-indent: 0;
+  margin-bottom: 1.5em;
+}
+
+figcaption {
+  margin-top: -15px;
+}

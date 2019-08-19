@@ -4,7 +4,7 @@
   <generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator>
   <link href="https://ricardocosteira.com/tag/android/feed.xml" rel="self" type="application/atom+xml" />
   <link href="https://ricardocosteira.com/" rel="alternate" type="text/html" />
-  <updated>2019-08-10T16:47:10+01:00</updated>
+  <updated>2019-08-19T02:01:07+01:00</updated>
   <id>https://ricardocosteira.com/tag/android/feed.xml</id>
 
   
@@ -30,6 +30,290 @@
   
   
 
+  
+    <entry>
+      <title type="html">Going with the Flow: from RxJava to Kotlin coroutines - Part 1</title>
+      <link href="https://ricardocosteira.com/going-with-the-flow-rxjava-to-coroutines-part-1" rel="alternate" type="text/html" title="Going with the Flow: from RxJava to Kotlin coroutines - Part 1" />
+      <published>2019-08-19T01:00:00+01:00</published>
+      <updated>2019-08-19T01:00:00+01:00</updated>
+      <id>https://ricardocosteira.com/going-with-the-flow-rxjava-to-coroutines-part-1</id>
+      <content type="html" xml:base="https://ricardocosteira.com/going-with-the-flow-rxjava-to-coroutines-part-1">&lt;p&gt;I’ve been playing around with Kotlin’s coroutines library. I had some trouble wrapping my head around the whole coroutine concept, mainly because I was consistently looking out for RxJava resemblances. Well, the truth is RxJava is one thing, and coroutines are another thing. Sure, they can be used for the same use cases, but they’re two different concepts. I’ll try not to go too deep into the rabit hole here, but RxJava is an API for asynchronous and/or concurrent programming that follows the &lt;strong&gt;functional&lt;/strong&gt; and &lt;strong&gt;reactive&lt;/strong&gt; paradigms. On the other hand, the coroutines library aims to facilitate asynchronous and/or concurrent programming, while &lt;strong&gt;deferring the decision of going functional or reactive to the user&lt;/strong&gt;. Once I became aware of this, coroutines became a lot easier to understand. And it took me a lot less time than RxJava. I dare say that this might mean they’re easier to grasp for beginners, or at least to someone that’s not familiarized with RxJava.&lt;/p&gt;
+
+&lt;p&gt;In this article series, I’ll go through a sample app built with RxJava and refactor it using the coroutines library. The plan for the series is to:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Refactor API requests with coroutines;&lt;/li&gt;
+  &lt;li&gt;Refactor a Database event subscription with Flow;&lt;/li&gt;
+  &lt;li&gt;Refactor a UI interaction with Flow and Channels;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I will show you both implementations and explain the reasoning behind them, albeit assuming that you’re at least familiar with RxJava. I will measure performance (I’m an Engineer™) and show you how can you write tests for both versions. In this article, I’ll start with the refactoring that, in my opinion, lays the foundation to understand the upcoming ones - refactoring API requests with coroutines. So, let’s get started.&lt;/p&gt;
+
+&lt;h3 id=&quot;the-app&quot;&gt;The app&lt;/h3&gt;
+
+&lt;p&gt;Well, more like “The view”. I didn’t want to show you just small “before” and “after” code samples, but I also didn’t want to make an extremely complex and hard to follow app.&lt;/p&gt;
+
+&lt;figure&gt;
+  &lt;img src=&quot;https://ricardocosteira.com/assets/images/going-with-the-flow-rxjava-to-coroutines-part-1-1.png&quot; alt=&quot;App screenshot&quot; /&gt;
+  &lt;figcaption&gt;Design skills too stronk.&lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;p&gt;The UI is composed by a &lt;code&gt;Fragment&lt;/code&gt; with a search bar and a &lt;code&gt;RecyclerView&lt;/code&gt; (don’t mind the &lt;code&gt;BottomNavigationView&lt;/code&gt;, it’s there just so that I can jump between different code samples - this is my skeleton/playground project). Each &lt;code&gt;RecyclerView&lt;/code&gt; item shows a card with user information. When the app starts, it checks the database for existing data, and displays it accordingly. It also queries the Github API for more data in order to update the database. The search bar filters the user list by name, and the &lt;em&gt;DELETE&lt;/em&gt; button on each card sends a delete command to the database for the corresponding user.&lt;/p&gt;
+
+&lt;p&gt;I’m using Room for the database and Retrofit for the Github API requests. Dependencies are provided by Dagger. The app as a whole is built using a common pattern (&lt;a href=&quot;http://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html&quot;&gt;Clean Architecture&lt;/a&gt;). State is managed through view state and view event classes. Data flow between the view and the &lt;code&gt;ViewModel&lt;/code&gt; is unidirectional. If you want to know more about the implementation details, you can check the &lt;a href=&quot;https://github.com/rcosteira79/AndroidMultiModuleCleanArchTemplate&quot;&gt;repository&lt;/a&gt;. That said, let’s dive into the API request details.&lt;/p&gt;
+
+&lt;h3 id=&quot;handling-an-api-request-with-rxjava&quot;&gt;Handling an API request with RxJava&lt;/h3&gt;
+
+&lt;p&gt;To fetch the users we need to contact the Github API. However, some of the information we want to show, such as location or blog url, are not available in the list that the API returns. As such, we need to do another request - one for &lt;strong&gt;each&lt;/strong&gt; user - to retrieve those details.&lt;/p&gt;
+
+&lt;p&gt;Given this, the app has the following Retrofit API:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Kotlin&quot;&gt;interface Api {
+  @GET(&quot;users&quot;)
+  fun getAllUsers(): Maybe&amp;lt;List&amp;lt;GithubUser&amp;gt;&amp;gt;
+
+  @GET(&quot;users/{username}&quot;)
+  fun getUserDetails(@Path(&quot;username&quot;) username: String): Maybe&amp;lt;GithubDetailedUser&amp;gt;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Yes, I could use &lt;code&gt;Observable&lt;/code&gt; instead of &lt;code&gt;Maybe&lt;/code&gt; here, but &lt;code&gt;Maybe&lt;/code&gt; makes more &lt;em&gt;semantic&lt;/em&gt; meaning to me: maybe I’ll get the response I expect, or maybe I won’t. Still, &lt;code&gt;getAllUsers&lt;/code&gt; returns a &lt;code&gt;List&amp;lt;GithubUser&amp;gt;&lt;/code&gt; stream, and we need to operate on each individual user. So the &lt;strong&gt;repository&lt;/strong&gt; converts this stream into an &lt;code&gt;Observable&lt;/code&gt; stream of &lt;code&gt;GithubUser&lt;/code&gt;. The other stream remains the same:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Kotlin&quot;&gt;override fun getUsersFromApi(): Observable&amp;lt;User&amp;gt; {
+  return api.getAllUsers() // returns Maybe for semantic purposes - one possible response on each request.
+    .flattenAsObservable { it } // However, we need to transform each element of the list
+    .map { userMapper.mapToEntity(it) }
+}
+
+override fun getUserDetailsFromApi(username: Username): Maybe&amp;lt;DetailedUser&amp;gt; {
+  return api.getUserDetails(username.value) // Username is an inline class. Handy for domain modeling!
+    .map { detailedUserMapper.mapToEntity(it) }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Following Clean Architecture, I have &lt;code&gt;UseCase&lt;/code&gt; classes connecting the &lt;code&gt;ViewModel&lt;/code&gt; to the repository. Regardless, I’m skipping them here since I’m only using them to forward the calls from the &lt;code&gt;ViewModel&lt;/code&gt; to the repository. This is actually something that bothers me, because according to the Clean Architecture definition, a use case is called a “use case” because it encapsulates use case logic. On Android though, we tend to keep the this logic both in the repository and the &lt;code&gt;ViewModel&lt;/code&gt; (at least in most Clean Architecture implementations I’ve seen so far). In other words, the &lt;code&gt;UseCase&lt;/code&gt; classes are used only to improve code readability - as their intent is, by nature, straightforward - and define boundaries. Since most of the work done by an Android app is fetching data from wherever and showing it on the screen, one might wonder if the extra classes, extra maintenance effort, extra performance cost and extra APK size increase are really worth it. Anyway, this is a subject for another article, maybe. Back to the refactoring.&lt;/p&gt;
+
+&lt;p&gt;The API is ready, and the repository is ready. Now we just need to make the call in the &lt;code&gt;ViewModel&lt;/code&gt;, and subscribe to it:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Kotlin&quot;&gt;// Gets users from the api and stores them in the database
+private fun updateCache() {
+  getUsersFromApiAsSingle()
+    .doOnSuccess { Logger.d(&quot;Updating database&quot;) }
+    .subscribeOn(Schedulers.io())
+    .subscribe(
+      { updateCachedUsers(it) }, //onSuccess
+      { handleErrors(it) } // onError
+    )
+    .addTo(compositeDisposable) // Extension function
+}
+
+private fun getUsersFromApiAsSingle(): Single&amp;lt;List&amp;lt;DetailedUser&amp;gt;&amp;gt; {
+  return getUsersFromApi(NoParameters()) // NoParameters is a UseCase implementation detail
+    .take(10) // Github API has a hourly call limit :D and 10 are more than enough for what we're doing
+    .flatMapMaybe { getUserDetailsFromApi(it.username) } // 2nd api call with information from the 1st one
+    .toList() // gather all stream events back into one Single list
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;I’m going to pretend I don’t have all these layers and boundaries for a second, so that the whole process is easier to visualize:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Kotlin&quot;&gt;api.getAllUsers() // returns Maybe for semantic purposes - one possible response on each request.
+  .flattenAsObservable { it } // However, we need to transform each element of the list
+  .map { userMapper.mapToEntity(it) }
+  .take(10) // Github API has a hourly call limit :D and 10 are more than enough for what we're doing
+  .flatMapMaybe { // 2nd api call with information from the 1st one
+      api.getUserDetails(username.value)
+          .map { detailedUserMapper.mapToEntity(it) }
+  }
+  .toList() // gather all stream events back into one Single list -&amp;gt; Single&amp;lt;List&amp;lt;DetailedUser&amp;gt;&amp;gt;
+  .doOnSuccess { Logger.d(&quot;Updating database&quot;) }
+  .subscribeOn(Schedulers.io())
+  .subscribe(
+    { updateCachedUsers(it) }, //onSuccess
+    { handleErrors(it) } // onError
+  )
+  .addTo(compositeDisposable) // Extension function
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Ok, so what’s happening here?&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;We send a request to the API and get back a &lt;code&gt;Maybe&amp;lt;List&amp;lt;GithubUser&amp;gt;&amp;gt;&lt;/code&gt; stream;&lt;/li&gt;
+  &lt;li&gt;We flatten the list into an &lt;code&gt;Observable&amp;lt;GithubUser&amp;gt;&lt;/code&gt; stream;&lt;/li&gt;
+  &lt;li&gt;We map each element to a domain entity called &lt;code&gt;User&lt;/code&gt; (even though I’m pretending there are no boundaries, I left this mapping on purpose since it’s part of the stream’s operations);&lt;/li&gt;
+  &lt;li&gt;We take the first ten elements just because we’ll have to do another API call for each user, and Github has a very low limit for unauthenticated requests;&lt;/li&gt;
+  &lt;li&gt;We use &lt;code&gt;flatMapMaybe&lt;/code&gt; to get the user details for each of the ten users, and map each one of the returned objects (&lt;code&gt;GithubDetailedUser&lt;/code&gt;) to a domain entity called &lt;code&gt;DetailedUser&lt;/code&gt;. Why &lt;code&gt;flatMapMaybe&lt;/code&gt; instead of a regular &lt;code&gt;flatMap&lt;/code&gt;? Because the &lt;code&gt;getUserDetails&lt;/code&gt; API call returns a &lt;code&gt;Maybe&amp;lt;GithubDetailedUser&amp;gt;&lt;/code&gt;, and a simple &lt;code&gt;flatMap&lt;/code&gt; requires that you provide it with the same kind of stream you apply it on, since it has to return the same type (in this case, an &lt;code&gt;Observable&lt;/code&gt; stream). As such, &lt;code&gt;flatMapMaybe&lt;/code&gt; is expecting a Maybe stream as its parameter, and returns an &lt;code&gt;Observable&lt;/code&gt; stream at the end;&lt;/li&gt;
+  &lt;li&gt;After &lt;code&gt;flatMapMaybe&lt;/code&gt; does its magic and flattens the incoming streams into one &lt;code&gt;Observable&amp;lt;DetailedUser&amp;gt;&lt;/code&gt; stream, we call the &lt;code&gt;toList&lt;/code&gt; operator, which in turn will output a &lt;code&gt;Single&amp;lt;List&amp;lt;DetailedUser&amp;gt;&amp;gt;&lt;/code&gt; stream;&lt;/li&gt;
+  &lt;li&gt;Finally, we do some logging, bind all operations to a thread from the IO pool and subscribe to the whole thing. Since the last operation outputs a &lt;code&gt;Single&lt;/code&gt; stream, the observer only has two functions: an &lt;code&gt;onSuccess&lt;/code&gt; lambda that calls the &lt;code&gt;updateCachedUsers&lt;/code&gt; method, and an &lt;code&gt;onError&lt;/code&gt; lambda that calls the &lt;code&gt;handleErrors&lt;/code&gt; method. If everything goes through the happy path, &lt;code&gt;updateCachedUsers&lt;/code&gt; then proceeds to update the database with the information it gets as parameter, i.e. a &lt;code&gt;List&amp;lt;DetailedUser&amp;gt;&lt;/code&gt;. The lack of an &lt;code&gt;observeOn&lt;/code&gt; operator is not a bug: &lt;code&gt;updateCachedUsers&lt;/code&gt; is supposed to run in the background, so we can keep the stream running in the same thread.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Whew. That’s a whole lot of stream operations. But it does exactly what we want: it fetched data from a remote API and updates the local database, all in an asynchronous - and partially concurrent, thanks to the flatMapMaybe - fashion. Let’s see how can we do the same with coroutines.&lt;/p&gt;
+
+&lt;h3 id=&quot;coroutines&quot;&gt;Coroutines&lt;/h3&gt;
+
+&lt;p&gt;First, I want to talk a little about how coroutines work in Kotlin. I’ll only graze the surface on the topic, but it should be enough to get you started. To make it easier to process, I’ll talk about the basic coroutine theory now, and then talk about the practical concepts as they show up while refactoring. If you already understand how coroutines work under the hood, you can skip to the next section.&lt;/p&gt;
+
+&lt;p&gt;So, a coroutine is a construct meant to turn async programming into a walk in a park. They are usually referred to as &lt;em&gt;lightweigth threads&lt;/em&gt;, since they are so much lighter to use than a regular thread. On Android at least, a typical thread occupies 1 to 2 MB of memory (that’s why we love thread pools!). Each Java thread gets mapped to a kernel thread, which means that the OS manages them. The OS then schedules which thread runs at a given time, jumps between them (context switching), has to invalidate cache in the process… All of these and other related operations have their performance cost.&lt;/p&gt;
+
+&lt;p&gt;Coroutines are executed in threads. These threads come from thread pools managed by coroutines themselves. Coroutines are not bound to any particular thread, which means that they can start in one thread, &lt;em&gt;suspend&lt;/em&gt;, and resume in another thread. Since this process is fully managed by coroutines through &lt;code&gt;Continuation&lt;/code&gt;s, we don’t get the context switching overhead (more on this in a minute). They also aren’t managed by the OS, which automatically frees us from the thread scheduler overhead mentioned above. The coroutine object in itself has a small memory footprint (bytes), which means that you can have a bunch of them being executed at the same time without having to worry about running out of memory. There are a few examples online where people launch 100.000 coroutines at the same time without having any problems at all, while getting an OutOfMemoryException when they try to do the same with regular threads.&lt;/p&gt;
+
+&lt;p&gt;I mentioned &lt;code&gt;Continuation&lt;/code&gt; before. This happens to be one of the most important aspects about coroutines, if not the most important. Kotlin coroutines implement what is called a &lt;strong&gt;continuation passing style&lt;/strong&gt;. Whenever you write a &lt;strong&gt;suspendable function&lt;/strong&gt; (you’ve probably seen &lt;code&gt;suspend fun&lt;/code&gt; written somewhere by now), you’re letting Kotlin know that this function is to be executed in a coroutine. Why? Because under the hood, the compiler translates the &lt;code&gt;suspend fun&lt;/code&gt; to a function that receives a &lt;code&gt;Continuation&lt;/code&gt; as a parameter! So, when you write something like this&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Kotlin&quot;&gt;suspend fun login(user: User): Token { ... }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It gets decompiled to something similar to&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Java&quot;&gt;Object login(User user, Continuation&amp;lt;Token&amp;gt; continuation) { ... }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Every time a coroutine suspends, it stores its state in the continuation. When it wants to resume its execution, it only has to check the continuation for the information it needs, and that’s it. This seamless suspend-resume process is what allows us to write seemingly &lt;strong&gt;sequential&lt;/strong&gt; code instead of callbacks for async work. Whenever there’s async work to be done, the coroutine suspends, and later resumes when the work is done. Meanwhile, the world keeps spinning like nothing’s going on, as this suspension &lt;strong&gt;does not&lt;/strong&gt; block the thread the coroutine is running on. In fact, while this coroutine is suspended, another coroutine can immediately start some work on the same thread.&lt;/p&gt;
+
+&lt;p&gt;Ok, you’re still reading. I know this is a lot, but hopefully it’ll help you understand things when we get our hands on the code (it certainly did help me).&lt;/p&gt;
+
+&lt;h3 id=&quot;handling-an-api-request-with-coroutines&quot;&gt;Handling an API request with coroutines&lt;/h3&gt;
+
+&lt;p&gt;Retrofit has native support for coroutines, so the first step is to add the &lt;code&gt;suspend&lt;/code&gt; keyword to the methods and change their return parameters:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Kotlin&quot;&gt;@GET(&quot;users&quot;)
+suspend fun getAllUsers(): List&amp;lt;GithubUser&amp;gt;
+
+@GET(&quot;users/{username}&quot;)
+suspend fun getUserDetails(@Path(&quot;username&quot;) username: String): GithubDetailedUser
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Easy enough. Now, propagate the same changes to the repository:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Kotlin&quot;&gt;override suspend fun getUsersFromApi(): List&amp;lt;User&amp;gt; {
+  return api.getAllUsers()
+    .map { userMapper.mapToEntity(it) }
+}
+
+override suspend fun getUserDetailsFromApi(username: Username): DetailedUser {
+  val detailedUser = api.getUserDetails(username.value)
+  return detailedUserMapper.mapToEntity(detailedUser)
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It’s not that different from what we had before. We’re still just mapping the data entities to domain entities. Nothing more.&lt;/p&gt;
+
+&lt;p&gt;Next up is the &lt;code&gt;ViewModel&lt;/code&gt;. Here is where the differences are noticeable:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Kotlin&quot;&gt;private fun updateCacheWithCoroutines() {
+  // I don't like try-catch. So we're using an exception handler instead
+  val exceptionHandler = CoroutineExceptionHandler { _, throwable -&amp;gt;
+    handleErrors(throwable)
+  }
+
+  // we want the coroutine to be bounded to the `ViewModel`'s lifecycle (it's on the main thread)
+  viewModelScope.launch(exceptionHandler) {
+    // But the request should go to the backgound
+    withContext(Dispatchers.IO) {
+      getUsersFromApiThroughCoroutine(this)
+    } // Don't forget: at this point, we're in the main thread context again!
+  }
+}
+
+private suspend fun getUsersFromApiThroughCoroutine(coroutineScope: CoroutineScope) {
+  val userList = getUsersFromApi(NoParameters()) // List&amp;lt;User&amp;gt;
+    .take(10) // Github API has a hourly call limit :D and 10 are more than enough for what we're doing
+    .map { coroutineScope.async { getUserDetailsFromApi(it.username) } } // Yay concurrency!
+    .map { it.await() } // Wait for them to finish... These two last maps are pretty much a flatMap
+
+  if (userList.isNotEmpty()) {
+    Logger.d(&quot;Updating database&quot;)
+    updateCachedUsers(userList)
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Before I start explaining what’s happening here, there are a few keypoints that you need to be aware of (if you know how coroutines are launched and what contexts and jobs are, you can skip to the next code snippet):&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Coroutines are launched through a &lt;code&gt;CoroutineBuilder&lt;/code&gt;. The typical ones are &lt;code&gt;launch&lt;/code&gt; and &lt;code&gt;async&lt;/code&gt; (theres also &lt;code&gt;runBlocking&lt;/code&gt;, which we’ll use for testing). As you can see above, you can launch coroutines inside coroutines: we’re launching coroutines with &lt;code&gt;async&lt;/code&gt;, while in another coroutine that was launched by &lt;code&gt;launch&lt;/code&gt;. The &lt;code&gt;async&lt;/code&gt; builder is used for concurrent tasks. You execute concurrent coroutines with it and wait for them with the &lt;code&gt;await&lt;/code&gt; suspending function, which suspends the parent coroutine until the async children finish;&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;Dispatchers&lt;/code&gt; are used to confine coroutine execution to specific threads. They are used either with a &lt;code&gt;CoroutineBuilder&lt;/code&gt; or with the &lt;code&gt;withContext&lt;/code&gt; suspendable function;&lt;/li&gt;
+  &lt;li&gt;Every coroutine is bound to a &lt;code&gt;CoroutineScope&lt;/code&gt;. These scopes let you bind the coroutine to specific lifecycles. &lt;code&gt;CoroutineBuilder&lt;/code&gt;s are actually extension functions defined in &lt;code&gt;CoroutineScope&lt;/code&gt; types (except for &lt;code&gt;runBlocking&lt;/code&gt;). On Android, we probably want to avoid &lt;code&gt;GlobalScope&lt;/code&gt;, which is meant for coroutines that run throughout the app’s lifetime. In the code, I use a &lt;code&gt;ViewModelScope&lt;/code&gt; to bind the coroutines to the &lt;code&gt;ViewModel&lt;/code&gt;’s lifecycle;&lt;/li&gt;
+  &lt;li&gt;Coroutines can be cancelled. We can cancel them either by throwing a &lt;code&gt;CancellationException&lt;/code&gt; or through a &lt;code&gt;Job&lt;/code&gt;. Every coroutine is associated with a &lt;code&gt;Job&lt;/code&gt;. Canceling a &lt;code&gt;Job&lt;/code&gt; will cancel its coroutine. &lt;code&gt;Job&lt;/code&gt;s can form parent-child hierarchies, where cancellation of the parent also cancels all children, and failure/cancellation of a child also cancels the parent (except if the child throws a &lt;code&gt;CancellationException&lt;/code&gt;). There’s also the &lt;code&gt;SupervisorJob&lt;/code&gt;, where a child can fail without affecting other children or the parent. The typical way to obtain a coroutine’s &lt;code&gt;Job&lt;/code&gt; is either by storing the return value of the &lt;code&gt;launch&lt;/code&gt; builder, or by accessing it directly inside the coroutine;&lt;/li&gt;
+  &lt;li&gt;Just like Android, coroutines have a &lt;strong&gt;context&lt;/strong&gt;. It’s main elements are the coroutine’s &lt;code&gt;Job&lt;/code&gt; and &lt;code&gt;Dispatcher&lt;/code&gt;. When the coroutine is launched, we have the choice of passing a &lt;code&gt;CoroutineContext&lt;/code&gt; to the builder. If we don’t, it’ll use a default one. We can also change the coroutine’s context later through the &lt;code&gt;withContext&lt;/code&gt; function. A bunch of different classes implement the &lt;code&gt;CoroutineContext&lt;/code&gt; interface, which is really handy (for instance, &lt;code&gt;Dispatchers&lt;/code&gt; implement it, so we can pass them to a &lt;code&gt;CoroutineBuilder&lt;/code&gt; or &lt;code&gt;withContext&lt;/code&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Back to the code. Like I did with the RxJava version, I’m going to pretend that there are no layers and join the whole thing:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Kotlin&quot;&gt;// I don't like try-catch. So we're using an exception handler instead
+val exceptionHandler = CoroutineExceptionHandler { _, throwable -&amp;gt;
+  handleErrors(throwable)
+}
+
+// we want the coroutine to be bounded to the `ViewModel`'s lifecycle (it's on the main thread)
+viewModelScope.launch(exceptionHandler) {
+  // But the request should go to the background
+  withContext(Dispatchers.IO) {
+    val userList = api.getAllUsers()
+      .map { userMapper.mapToEntity(it) }
+      .take(10) // Github API has a hourly call limit :D and 10 are more than enough for what we're doing
+      .map {
+        async { // Yay concurrency!
+          val detailedUser = api.getUserDetails(it.username.value)
+          detailedUserMapper.mapToEntity(detailedUser)
+        }
+      }
+      .map { it.await() } // Wait for all calls to finish... These two last maps are pretty much a flatMap
+
+    if (userList.isNotEmpty()) {
+      Logger.d(&quot;Updating database&quot;)
+      updateCachedUsers(userList)
+    }
+  } // Don't forget: at this point, we're in the main thread context again!
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Lets begin:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;We start by creating a &lt;code&gt;CoroutineExceptionHandler&lt;/code&gt;. Coroutines bubble up exceptions all the way to the top-most coroutine, so instead of having &lt;code&gt;try-catch&lt;/code&gt; blocks all over the place, we pass an exception handler &lt;strong&gt;to the top-most coroutine&lt;/strong&gt;. This handler works for simple cases, as it will handle all exceptions (note that child coroutines can still have their own exception handling mechanisms);&lt;/li&gt;
+  &lt;li&gt;We &lt;code&gt;launch&lt;/code&gt; a coroutine on the &lt;code&gt;viewModelScope&lt;/code&gt; and pass it the exception handler (&lt;code&gt;CoroutineExceptionHandler&lt;/code&gt; also implements &lt;code&gt;CoroutineContext&lt;/code&gt;). By launching the coroutine on this scope, we’re also binding it to the &lt;strong&gt;main thread&lt;/strong&gt;. On a side note, we need to clear all the &lt;code&gt;viewModelScope&lt;/code&gt;’s &lt;code&gt;Job&lt;/code&gt;s at the end of the &lt;code&gt;ViewModel&lt;/code&gt;’s lifecycle, just like we do with Rx’s &lt;code&gt;CompositeDisposable&lt;/code&gt;;&lt;/li&gt;
+  &lt;li&gt;As soon as we start the coroutine, we change its context so that it’ll run on the IO thread pool. Now, this is &lt;strong&gt;very&lt;/strong&gt; important: the code inside &lt;code&gt;withContext&lt;/code&gt;’s lambda will run on an IO thread. As &lt;strong&gt;soon&lt;/strong&gt; as the lambda ends in line 25, we’re back to the main thread! Unlike RxJava where we’re used to bind the upstream to a thread and the downstream to another thread, coroutines rely on the actual &lt;strong&gt;blocks&lt;/strong&gt; of code. In other words, everything inside the &lt;code&gt;launch {}&lt;/code&gt; block will run on the main thread, but since we explicitly specify that an inner block should run on an IO thread with &lt;code&gt;withContext&lt;/code&gt;, so it will be;&lt;/li&gt;
+  &lt;li&gt;We get the users from the API, map them to domain entities and take the first ten;&lt;/li&gt;
+  &lt;li&gt;Now for the other interesting bit. For each &lt;code&gt;User&lt;/code&gt;, we’re launching a new coroutine with &lt;code&gt;async&lt;/code&gt; in order to fetch the details from the API. We then map each response item to a domain entity. Due to the &lt;code&gt;async&lt;/code&gt; calls, this &lt;code&gt;map&lt;/code&gt; will return &lt;code&gt;List&amp;lt;Deferred&amp;lt;DetailedUser&amp;gt;&amp;gt;&lt;/code&gt;, as each &lt;code&gt;async&lt;/code&gt; returns a &lt;code&gt;Deferred&amp;lt;T&amp;gt;&lt;/code&gt; type. All &lt;code&gt;async&lt;/code&gt; calls effectively run in a concurrent manner;&lt;/li&gt;
+  &lt;li&gt;Right below, we have another &lt;code&gt;map&lt;/code&gt; being called. We’re calling it so that we can call &lt;code&gt;await&lt;/code&gt; on each of the &lt;code&gt;Deferred&lt;/code&gt; values, in order for the coroutine to suspend until they all finish. In the end, by using this &lt;code&gt;map&lt;/code&gt; together with the one with the &lt;code&gt;async&lt;/code&gt; calls, we’re mimicking what an Rx’s &lt;code&gt;flatMap&lt;/code&gt; would do;&lt;/li&gt;
+  &lt;li&gt;That’s it. The rest is just sequential, normal code. However, a side note on this. &lt;code&gt;updateCachedUsers&lt;/code&gt; is a call that gets propagated through the repository until it triggers Room to actually update itself with the new data. Now, the caveat: if the actual Room function was a &lt;code&gt;suspend&lt;/code&gt; function, this &lt;code&gt;updateCachedUsers&lt;/code&gt; call above would have to be out the &lt;code&gt;withContext&lt;/code&gt; block, and be executed in the main thread. As it turns out, Room &lt;code&gt;suspend&lt;/code&gt; functions are &lt;strong&gt;main-safe&lt;/strong&gt;, as Room uses its own custom &lt;code&gt;Dispatcher&lt;/code&gt; - calling it from any other thread other that main will only slow things down.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;final-words&quot;&gt;Final words&lt;/h3&gt;
+
+&lt;p&gt;This concludes the part 1 of this series. I wanted to include both testing and performance measurements for this refactoring in this article as well, but damn, this is already huge as it is. That said, in part 2 I’ll be writing about how can you unit test both implementations (although I don’t agree that you should, but I’ll explain why in the article) and compare them both in terms of performance. I’m expecting them to be really close to each other in execution time, but I’m rather curious with the memory footprint of each implementation. If I had to bet, I’d say that RxJava is heavier on memory usage, but we’ll see.&lt;/p&gt;
+
+&lt;p&gt;As for RxJava vs. coroutines… Well, as I said in the begining, you really can’t compare two different things. The only thing I can say right now is that both are really fun to use, and if your RxJava use case is one where you only use it for network calls &lt;strong&gt;and you’re looking for an alternative&lt;/strong&gt;, you should totally consider coroutines.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Thank you so much for taking your time to read this. Do you have any thoughts or opinions? If so, please leave a comment or reach out on Twitter. See you in part 2!&lt;/p&gt;</content>
+
+      
+      
+      
+      
+      
+
+      <author>
+          <name>Ricardo Costeira</name>
+        
+        
+      </author>
+
+      
+
+      
+        <category term="Android" />
+      
+
+      
+        <summary type="html">I’ve been playing around with Kotlin’s coroutines library. I had some trouble wrapping my head around the whole coroutine concept, mainly because I was consistently looking out for RxJava resemblances. Well, the truth is RxJava is one thing, and coroutines are another thing. Sure, they can be used for the same use cases, but they’re two different concepts. I’ll try not to go too deep into the rabit hole here, but RxJava is an API for asynchronous and/or concurrent programming that follows the functional and reactive paradigms. On the other hand, the coroutines library aims to facilitate asynchronous and/or concurrent programming, while deferring the decision of going functional or reactive to the user. Once I became aware of this, coroutines became a lot easier to understand. And it took me a lot less time than RxJava. I dare say that this might mean they’re easier to grasp for beginners, or at least to someone that’s not familiarized with RxJava.</summary>
+      
+
+      
+      
+    </entry>
   
     <entry>
       <title type="html">How not to use sealed classes and LiveData for state management</title>
