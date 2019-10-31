@@ -4,7 +4,7 @@
   <generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator>
   <link href="https://ricardocosteira.com/tag/android/feed.xml" rel="self" type="application/atom+xml" />
   <link href="https://ricardocosteira.com/" rel="alternate" type="text/html" />
-  <updated>2019-10-31T00:38:04+00:00</updated>
+  <updated>2019-10-31T00:43:08+00:00</updated>
   <id>https://ricardocosteira.com/tag/android/feed.xml</id>
 
   
@@ -281,7 +281,7 @@ viewModelScope.launch(exceptionHandler) {
 
 &lt;h3 id=&quot;final-words&quot;&gt;Final words&lt;/h3&gt;
 
-&lt;p&gt;This concludes the part 1 of this series. I wanted to include both testing and performance measurements for this refactoring in this article as well, but damn, this is already huge as it is. That said, in part 2 I’ll be writing about how can you unit test both implementations (although I don’t agree that you should, but I’ll explain why in the article) and compare them both in terms of performance. I’m expecting them to be really close to each other in execution time, but I’m rather curious with the memory footprint of each implementation. If I had to bet, I’d say that RxJava is heavier on memory usage, but we’ll see.&lt;/p&gt;
+&lt;p&gt;This concludes the part 1 of this series. I wanted to include both testing and performance measurements for this refactoring in this article as well, but damn, this is already huge as it is. That said, in part 2 I’ll be writing about how can you unit test both implementations (although I don’t agree that you should in this specific case, but I’ll explain why in the article) and compare them both in terms of performance. I’m expecting them to be really close to each other in execution time, but I’m rather curious with the memory footprint of each implementation. If I had to bet, I’d say that RxJava is heavier on memory usage, but we’ll see.&lt;/p&gt;
 
 &lt;p&gt;As for RxJava vs. coroutines… Well, as I said in the beginning, you really can’t compare two different things. The only thing I can say right now is that both are really fun to use, and if your RxJava use case is one where you only use it for async work &lt;strong&gt;and you’re looking for an alternative&lt;/strong&gt;, you should totally consider coroutines.&lt;/p&gt;
 
