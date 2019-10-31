@@ -49,7 +49,7 @@
     <!-- This tag outputs SEO meta+structured data and other important settings -->
     <meta
   name="description"
-  content="A mobile software engineer with a passion for Android and clean, maintainable code. I build apps from the ground up and maintain existing ones. Currently out of my area of expertise in order to diversify my skills on software design and architecture."
+  content="A mobile software engineer with a passion for Android and clean, maintainable code. I build apps from the ground up and maintain existing ones."
 />
 <link
   rel="shortcut icon"
@@ -538,7 +538,7 @@ viewModelScope.launch(exceptionHandler) {
 
 <p>This concludes the part 1 of this series. I wanted to include both testing and performance measurements for this refactoring in this article as well, but damn, this is already huge as it is. That said, in part 2 I’ll be writing about how can you unit test both implementations (although I don’t agree that you should, but I’ll explain why in the article) and compare them both in terms of performance. I’m expecting them to be really close to each other in execution time, but I’m rather curious with the memory footprint of each implementation. If I had to bet, I’d say that RxJava is heavier on memory usage, but we’ll see.</p>
 
-<p>As for RxJava vs. coroutines… Well, as I said in the begining, you really can’t compare two different things. The only thing I can say right now is that both are really fun to use, and if your RxJava use case is one where you only use it for network calls <strong>and you’re looking for an alternative</strong>, you should totally consider coroutines.</p>
+<p>As for RxJava vs. coroutines… Well, as I said in the beginning, you really can’t compare two different things. The only thing I can say right now is that both are really fun to use, and if your RxJava use case is one where you only use it for async work <strong>and you’re looking for an alternative</strong>, you should totally consider coroutines.</p>
 
 <hr />
 
@@ -704,7 +704,7 @@ viewModelScope.launch(exceptionHandler) {
                 <span class="reading-time">
                     
                     
-                      9 min read
+                      6 min read
                     
                 </span>
             </footer>
