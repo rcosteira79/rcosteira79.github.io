@@ -181,9 +181,16 @@ into the {body} of the default.hbs template -->
         <nav class="site-nav">
   <div class="site-nav-left">
      <ul class="nav" role="menu">
-    <li class="nav-home" role="menuitem"><a href="/">Home</a></li>
-    <li class="nav-getting-started" role="menuitem"><a href="/tag/android/">Android</a></li>
-    <li class="nav-about" role="menuitem"><a href="/about/">About</a></li>
+  <li class="nav-home" role="menuitem"><a href="/">Home</a></li>
+  <li class="nav-getting-started" role="menuitem">
+    <a href="/tag/android/">Android</a>
+  </li>
+  <li class="nav-getting-started" role="menuitem">
+    <a href="/tag/talks/">Talks</a>
+  </li>
+  <li class="nav-about" role="menuitem">
+    <a href="/about/">About</a>
+  </li>
 </ul>
  
   </div>
@@ -472,7 +479,7 @@ override suspend fun getUserDetailsFromApi(username: Username): DetailedUser {
 private suspend fun getUsersFromApiThroughCoroutine(coroutineScope: CoroutineScope) {
   val userList = getUsersFromApi(NoParameters()) // List&lt;User&gt;
     .take(10) // Github API has a hourly call limit :D and 10 are more than enough for what we're doing
-    .map { coroutineScope.async { getUserDetailsFromApi(it.username) } } // Yay concurrency!
+    .map { coroutineScope.async { getUserDetailsFromApi(it.username) } } // Yay parallelism!
     .map { it.await() } // Wait for them to finish... These two last maps are pretty much a flatMap
 
   if (userList.isNotEmpty()) {

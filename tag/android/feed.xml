@@ -4,7 +4,7 @@
   <generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator>
   <link href="https://ricardocosteira.com/tag/android/feed.xml" rel="self" type="application/atom+xml" />
   <link href="https://ricardocosteira.com/" rel="alternate" type="text/html" />
-  <updated>2019-10-31T00:45:02+00:00</updated>
+  <updated>2019-12-22T16:03:27+00:00</updated>
   <id>https://ricardocosteira.com/tag/android/feed.xml</id>
 
   
@@ -217,7 +217,7 @@ override suspend fun getUserDetailsFromApi(username: Username): DetailedUser {
 private suspend fun getUsersFromApiThroughCoroutine(coroutineScope: CoroutineScope) {
   val userList = getUsersFromApi(NoParameters()) // List&amp;lt;User&amp;gt;
     .take(10) // Github API has a hourly call limit :D and 10 are more than enough for what we're doing
-    .map { coroutineScope.async { getUserDetailsFromApi(it.username) } } // Yay concurrency!
+    .map { coroutineScope.async { getUserDetailsFromApi(it.username) } } // Yay parallelism!
     .map { it.await() } // Wait for them to finish... These two last maps are pretty much a flatMap
 
   if (userList.isNotEmpty()) {
