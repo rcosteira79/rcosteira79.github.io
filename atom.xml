@@ -8,6 +8,23 @@
     
       
       <item>
+        <title>My talk about Kotlin Flow at DevFest Leiria 2019</title>
+        
+          <description>&lt;p&gt;On December 14 of 2019, I gave a talk about Kotlin Flow at DevFest Leiria.
+My main motivation for wanting to give this talk was simple: reactive programming is here to stay.
+Most Android devs nowadays are used to sprinkle RxJava throughout their apps, even if they don’t actually have use for reactive streams and just want to simplify thread scheduling. However, it’s also true that more and more devs are becoming aware that Rx is an overkill for their use case, and long for better options.&lt;/p&gt;
+
+</description>
+        
+        <pubDate>Mon, 23 Dec 2019 00:00:00 +0000</pubDate>
+        <link>
+        https://ricardocosteira.com/my-talk-about-kotlin-flow-at-devfest-leiria-2019</link>
+        <guid isPermaLink="true">https://ricardocosteira.com/my-talk-about-kotlin-flow-at-devfest-leiria-2019</guid>
+      </item>
+      
+    
+      
+      <item>
         <title>Going with the Flow: from RxJava to Kotlin coroutines - Part 1</title>
         
           <description>&lt;p&gt;I’ve been playing around with Kotlin’s coroutines library. I had some trouble wrapping my head around the whole coroutine concept, mainly because I was consistently looking out for RxJava resemblances. Well, the truth is RxJava is one thing, and coroutines are another thing. Sure, they can be used for the same use cases, but they’re two different concepts. I’ll try not to go too deep into the rabit hole here, but RxJava is an API for asynchronous and/or concurrent programming that follows the &lt;strong&gt;functional&lt;/strong&gt; and &lt;strong&gt;reactive&lt;/strong&gt; paradigms. On the other hand, the coroutines library aims to facilitate asynchronous and/or concurrent programming, while &lt;strong&gt;deferring the decision of going functional or reactive to the user&lt;/strong&gt;. Once I became aware of this, coroutines became a lot easier to understand. And it took me a lot less time than RxJava. I dare say that this might mean they’re easier to grasp for beginners, or at least to someone that’s not familiarized with RxJava.&lt;/p&gt;
