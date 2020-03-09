@@ -8,6 +8,21 @@
     
       
       <item>
+        <title>Glide'ing your way into RecyclerView state invalidation</title>
+        
+          <description>&lt;p&gt;A few days ago, I worked on a sample project for a tutorial. It was a very simple app: a list of images, where you could click any image to view it in full screen. The code was simple, well structured, did what it had to do, and did it well. There was only one problem: the &lt;code&gt;RecyclerView&lt;/code&gt; responsible for showing the image list was resetting its state, i.e., its scroll position, when you came back to it after checking an image in full screen.&lt;/p&gt;
+
+</description>
+        
+        <pubDate>Mon, 09 Mar 2020 10:00:00 +0000</pubDate>
+        <link>
+        https://ricardocosteira.com/glideing-your-way-into-recyclerview-state-invalidation</link>
+        <guid isPermaLink="true">https://ricardocosteira.com/glideing-your-way-into-recyclerview-state-invalidation</guid>
+      </item>
+      
+    
+      
+      <item>
         <title>My talk about Kotlin Flow at DevFest Leiria 2019</title>
         
           <description>&lt;p&gt;On December 14 of 2019, I gave a talk about Kotlin Flow at DevFest Leiria.

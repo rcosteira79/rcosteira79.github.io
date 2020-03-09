@@ -4,7 +4,7 @@
   <generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator>
   <link href="https://ricardocosteira.com/tag/android/feed.xml" rel="self" type="application/atom+xml" />
   <link href="https://ricardocosteira.com/" rel="alternate" type="text/html" />
-  <updated>2019-12-23T21:59:26+00:00</updated>
+  <updated>2020-03-09T12:12:37+00:00</updated>
   <id>https://ricardocosteira.com/tag/android/feed.xml</id>
 
   
@@ -30,6 +30,196 @@
   
   
 
+  
+    <entry>
+      <title type="html">Glide’ing your way into RecyclerView state invalidation</title>
+      <link href="https://ricardocosteira.com/glideing-your-way-into-recyclerview-state-invalidation" rel="alternate" type="text/html" title="Glide'ing your way into RecyclerView state invalidation" />
+      <published>2020-03-09T10:00:00+00:00</published>
+      <updated>2020-03-09T10:00:00+00:00</updated>
+      <id>https://ricardocosteira.com/glideing-your-way-into-recyclerview-state-invalidation</id>
+      <content type="html" xml:base="https://ricardocosteira.com/glideing-your-way-into-recyclerview-state-invalidation">&lt;p&gt;A few days ago, I worked on a sample project for a tutorial. It was a very simple app: a list of images, where you could click any image to view it in full screen. The code was simple, well structured, did what it had to do, and did it well. There was only one problem: the &lt;code&gt;RecyclerView&lt;/code&gt; responsible for showing the image list was resetting its state, i.e., its scroll position, when you came back to it after checking an image in full screen.&lt;/p&gt;
+
+&lt;h2 id=&quot;a-few-things-about-recyclerviews&quot;&gt;A few things about RecyclerViews&lt;/h2&gt;
+
+&lt;p&gt;Well, this can’t be right… I know I’m doing everything I’m supposed to do in order for the &lt;code&gt;RecyclerView&lt;/code&gt; to be able to retain its scroll position!&lt;/p&gt;
+
+&lt;p&gt;Given the huge amount of code samples online explaining how to manually save and restore &lt;code&gt;RecyclerView&lt;/code&gt; state, it seems that a lot of people think that this isn’t supposed to happen automatically. Well, it is, and it’s actually quite simple to do. You just have to make sure that:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;The &lt;code&gt;RecyclerView&lt;/code&gt; has an ID.&lt;/li&gt;
+  &lt;li&gt;You setup the &lt;code&gt;Adapter&lt;/code&gt; with all the data &lt;strong&gt;before&lt;/strong&gt; the &lt;code&gt;RecyclerView&lt;/code&gt; goes through its first layout pass.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The first one is simple: you just go to the layout and add an ID to the &lt;code&gt;RecyclerView&lt;/code&gt;. By default, if a &lt;code&gt;View&lt;/code&gt; doesn’t have an ID, its state &lt;a href=&quot;https://android.googlesource.com/platform/frameworks/base/+/refs/heads/android10-c2f2-release/core/java/android/view/View.java#20264&quot; target=&quot;_blank&quot;&gt;won’t be stored&lt;/a&gt;. This one’s actually hard to miss since you’re probably using an ID to access the view in the code.&lt;/p&gt;
+
+&lt;p&gt;The second one is trickier. It’s not only a matter of setting up the &lt;code&gt;Adapter&lt;/code&gt; before the &lt;code&gt;RecyclerView&lt;/code&gt;. You need to make sure that when the &lt;code&gt;RecyclerView&lt;/code&gt; is about to go through that first layout pass, it already has &lt;strong&gt;all the data&lt;/strong&gt; it needs. If the layout pass starts and the &lt;code&gt;Adapter&lt;/code&gt; doesn’t have the same data or is empty, the &lt;code&gt;RecyclerView&lt;/code&gt;’s scroll position will get reset, as its state will be invalidated. So, for instance, if an app displaying a &lt;code&gt;RecyclerView&lt;/code&gt; undergoes a config change and has to send an API request for data, it’ll be next to impossible for the data to arrive in time for the layout pass, which means that the &lt;code&gt;RecyclerView&lt;/code&gt;’s scrolling position will inevitably be reset to the initial position.&lt;/p&gt;
+
+&lt;p&gt;The solution here is simple: just cache the data. For example, if you have all the data cached in a &lt;code&gt;LiveData&lt;/code&gt;, something like this will work:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Kotlin&quot;&gt;override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
+  ): View? {
+    val view = inflater.inflate(R.layout.fragment_list, container, false)
+
+    val myAdapter = createAdapter()
+
+    setupRecyclerView(view, myAdapter)
+    observeViewModel(myAdapter)
+
+    return view
+  }
+
+private fun setupRecyclerView(view: View, myAdapter: MyAdapter) {
+  view.recyclerView.adapter = myAdapter
+
+  // Other settings like listeners, setHasFixedSize, etc
+}
+
+private fun observeViewModel(myAdapter: MyAdapter) {
+  viewModel.myLiveData.observe(viewLifecycleOwner) {
+    myAdapter.submitList(it)
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;By the time the &lt;code&gt;RecyclerView&lt;/code&gt; starts getting drawn, the data is more than ready.&lt;/p&gt;
+
+&lt;h2 id=&quot;hello-darkness-my-old-friend&quot;&gt;Hello darkness my old friend&lt;/h2&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;“What am I missing?!”&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This was the question I asked myself for three days. My &lt;code&gt;RecyclerView&lt;/code&gt; had an ID, and my data was cached and ready on time, so what could be wrong?&lt;/p&gt;
+
+&lt;p&gt;I tried everything I could think of. Removing &lt;code&gt;setHasFixedSize(true)&lt;/code&gt; from the &lt;code&gt;RecyclerView&lt;/code&gt; setup, removing animations, using &lt;code&gt;RecyclerView.Adapter&lt;/code&gt; instead of &lt;code&gt;ListAdapter&lt;/code&gt;, &lt;code&gt;StaggeredGridLayout&lt;/code&gt; instead of &lt;code&gt;GridLayout&lt;/code&gt;, setting things up in different lifecycle methods and in different combinations, persisting everything… I even saved and restored the state manually at one point, but was not happy at all with the result (UI flickering). Going through the &lt;code&gt;RecyclerView&lt;/code&gt;’s code, I could see that its state was indeed being saved and correctly retrieved, but later invalidated. I hadn’t felt this mad at Android for years!&lt;/p&gt;
+
+&lt;p&gt;As I was close to give up on fixing the bug and on my software engineering career in general, I began browsing Slack channels. In one specific channel, I found something that &lt;a href=&quot;https://twitter.com/JonFHancock&quot; target=&quot;_blank&quot;&gt;Jon F Hancock&lt;/a&gt; said when trying to help someone else with a different &lt;code&gt;RecyclerView&lt;/code&gt; problem:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;If the size of your RecyclerView depends on its children, you shouldn’t set that to true.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The “that” in the quote refers to &lt;code&gt;setHasFixedSize(true)&lt;/code&gt;. But the bit that actually caught my attention was the first part: “&lt;em&gt;If the size of your RecyclerView depends on its children (…)&lt;/em&gt;”.&lt;/p&gt;
+
+&lt;p&gt;Holy crap. Could it be?&lt;/p&gt;
+
+&lt;h2 id=&quot;i-can-see-clearly-now-the-rain-is-gone&quot;&gt;I can see clearly now, the rain is gone&lt;/h2&gt;
+
+&lt;p&gt;What Jon said was related to the &lt;code&gt;Recyclerview&lt;/code&gt;’s size. However, it got me thinking about the size of the &lt;code&gt;RecyclerView&lt;/code&gt;’s children.&lt;/p&gt;
+
+&lt;p&gt;So, here’s the layout for the &lt;code&gt;RecyclerView&lt;/code&gt; items:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-xml&quot;&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&amp;gt;
+&amp;lt;ImageView xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+  xmlns:tools=&quot;http://schemas.android.com/tools&quot;
+  android:id=&quot;@+id/image_view_image&quot;
+  android:layout_width=&quot;match_parent&quot;
+  android:layout_height=&quot;wrap_content&quot;
+  android:adjustViewBounds=&quot;true&quot;
+  android:contentDescription=&quot;@null&quot;
+  tools:src=&quot;@tools:sample/backgrounds/scenic&quot; /&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;At a first glance, you probably won’t see anything unusual. And there isn’t! It’s a pretty standard setup for an &lt;code&gt;ImageView&lt;/code&gt;. However, this innocent code was masking a nasty bug.&lt;/p&gt;
+
+&lt;p&gt;The images that feed the &lt;code&gt;RecyclerView&lt;/code&gt; come from an image API. The images are random, and are loaded by &lt;strong&gt;Glide&lt;/strong&gt;. Here’s the extension function for image loading:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Kotlin&quot;&gt;fun ImageView.load(imageAddress: String) {
+  Glide.with(this)
+      .load(imageAddress)
+      .into(this)
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Glide is smart enough to cache unmodified data, so it won’t keep requesting the images from the API. However, Glide caches the images with their original size, so it will still have to resize them to fit in the &lt;code&gt;ImageView&lt;/code&gt;. Not only that, but since the xml layout is setting the height for the &lt;code&gt;ImageView&lt;/code&gt; as &lt;code&gt;wrap_content&lt;/code&gt;, and Glide is not specifying any default size either, the latter will have to calculate the height of &lt;strong&gt;each&lt;/strong&gt; image it loads.&lt;/p&gt;
+
+&lt;p&gt;This calculation takes its time, and while Glide is busy with it, the &lt;code&gt;RecyclerView&lt;/code&gt; is setting up its layout. When it’s ready to layout its children, it gets the height of each item so that it knows the space each of them will occupy, i.e., how many &lt;code&gt;ViewHolder&lt;/code&gt; instances it needs. The &lt;code&gt;RecyclerView&lt;/code&gt; reaches this step in a lot less time than Glide takes to be done with the image size calculations. As such, by having the height of the &lt;code&gt;ImageView&lt;/code&gt; declared as &lt;code&gt;wrap_content&lt;/code&gt;, its actual measured height &lt;strong&gt;will default to zero&lt;/strong&gt; until it’s finally displaying an image.&lt;/p&gt;
+
+&lt;p&gt;This effectively messes up the whole logic that comes afterwards:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;The &lt;code&gt;RecyclerView&lt;/code&gt;uses the scrolling position that comes from the previous state to know from which view it should start displaying the items.&lt;/li&gt;
+  &lt;li&gt;Using the current position and the size of the items, the &lt;code&gt;RecyclerView&lt;/code&gt; figures out how many more items it can show. It first goes from the current position to the last item, and then from the current position to the first item.&lt;/li&gt;
+  &lt;li&gt;Since the item size is coming out as zero, it’ll basically try to set &lt;strong&gt;every item&lt;/strong&gt; in the item list as a visible item. This will then make it so that the previous state is invalidated, forcing the &lt;code&gt;RecyclerView&lt;/code&gt;to reset everything and discard the scrolling position, drawing the items from the beginning.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Uff! How can you solve this then? There are a few options. You can:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Hardcode the height in the layout&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-xml&quot;&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&amp;gt;
+&amp;lt;ImageView xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+  xmlns:tools=&quot;http://schemas.android.com/tools&quot;
+  android:id=&quot;@+id/image_view_doggo&quot;
+  android:layout_width=&quot;match_parent&quot;
+  android:layout_height=&quot;200dp&quot;
+  android:adjustViewBounds=&quot;true&quot;
+  android:contentDescription=&quot;@null&quot;
+  tools:src=&quot;@tools:sample/backgrounds/scenic&quot; /&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Override the view size with Glide&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Kotlin&quot;&gt;fun ImageView.load(imageAddress: String) {
+  Glide.with(this)
+      .load(imageAddress)
+      .override(Target.SIZE_ORIGINAL, 200)
+      .into(this)
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Add a placeholder with Glide, so that the &lt;code&gt;RecyclerView&lt;/code&gt; uses its height&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-Kotlin&quot;&gt;fun ImageView.load(imageAddress: String) {
+  Glide.with(this)
+      .load(imageAddress)
+      .placeholder(R.drawable.placeholder)
+      .into(this)
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The main point here is that, as long as you set the height of the view &lt;strong&gt;before&lt;/strong&gt; the &lt;code&gt;RecyclerView&lt;/code&gt; tries to layout its children, you’re good!&lt;/p&gt;
+
+&lt;h2 id=&quot;final-thoughts&quot;&gt;Final thoughts&lt;/h2&gt;
+
+&lt;p&gt;That’s it for this article. Congratulations on your retained &lt;code&gt;RecyclerView&lt;/code&gt; state! I hope this was helpful, or that you at least learned something new. Feel free to talk about it either in the comment section down below or at Twitter.&lt;/p&gt;
+
+&lt;p&gt;Until next time!&lt;/p&gt;</content>
+
+      
+      
+      
+      
+      
+
+      <author>
+          <name>Ricardo Costeira</name>
+        
+        
+      </author>
+
+      
+
+      
+        <category term="Android" />
+      
+
+      
+        <summary type="html">A few days ago, I worked on a sample project for a tutorial. It was a very simple app: a list of images, where you could click any image to view it in full screen. The code was simple, well structured, did what it had to do, and did it well. There was only one problem: the RecyclerView responsible for showing the image list was resetting its state, i.e., its scroll position, when you came back to it after checking an image in full screen.</summary>
+      
+
+      
+      
+    </entry>
   
     <entry>
       <title type="html">My talk about Kotlin Flow at DevFest Leiria 2019</title>

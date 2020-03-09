@@ -12,7 +12,7 @@
 
     <title>
       
-      How not to use sealed classes and LiveData for state management
+      Glide'ing your way into RecyclerView state invalidation
       
     </title>
 
@@ -58,7 +58,7 @@
 />
 <link
   rel="canonical"
-  href="https://ricardocosteira.com/how-not-to-use-sealed-classes-and-livedata-for-state-management"
+  href="https://ricardocosteira.com/glideing-your-way-into-recyclerview-state-invalidation"
 />
 <meta name="referrer" content="no-referrer-when-downgrade" />
 
@@ -68,19 +68,19 @@
 <meta property="og:type" content="website" />
 <meta
   property="og:title"
-  content="How not to use sealed classes and LiveData for state management"
+  content="Glide'ing your way into RecyclerView state invalidation"
 />
 <meta
   property="og:description"
-  content="A few months ago, I was washing my dishes while listening to episode 148 of the Fragmented podcast. In this episode, Donn Felker and Kaushik Gopal talk about architecture. To be specific, about an MVI-like architecture that Kaushik has been using. This architecture specifies that each screen has one and"
+  content="A few days ago, I worked on a sample project for a tutorial. It was a very simple app: a list of images, where you could click any image to view it in full screen. The code was simple, well structured, did what it had to do, and did it"
 />
 <meta
   property="og:url"
-  content="https://ricardocosteira.com/how-not-to-use-sealed-classes-and-livedata-for-state-management"
+  content="https://ricardocosteira.com/glideing-your-way-into-recyclerview-state-invalidation"
 />
 <meta
   property="og:image"
-  content="https://ricardocosteira.com/assets/images/how-not-to-use-sealed-classes-and-livedata-for-state-management.jpg"
+  content="https://ricardocosteira.com/assets/images/glideing-your-way-into-recyclerview-state-invalidation.jpg"
 />
 <meta
   property="article:publisher"
@@ -92,11 +92,11 @@
 />
 <meta
   property="article:published_time"
-  content="2019-05-28T11:00:00+01:00"
+  content="2020-03-09T10:00:00+00:00"
 />
 <meta
   property="article:modified_time"
-  content="2019-05-28T11:00:00+01:00"
+  content="2020-03-09T10:00:00+00:00"
 />
 <meta
   property="article:tag"
@@ -105,16 +105,16 @@
 <meta name="twitter:card" content="summary_large_image" />
 <meta
   name="twitter:title"
-  content="How not to use sealed classes and LiveData for state management"
+  content="Glide'ing your way into RecyclerView state invalidation"
 />
 <meta
   name="twitter:description"
-  content="A few months ago, I was washing my dishes while listening to episode 148 of the Fragmented podcast. In this episode, Donn Felker and Kaushik Gopal talk about architecture. To be specific, about an MVI-like architecture that Kaushik has been using. This architecture specifies that each screen has one and"
+  content="A few days ago, I worked on a sample project for a tutorial. It was a very simple app: a list of images, where you could click any image to view it in full screen. The code was simple, well structured, did what it had to do, and did it"
 />
 <meta name="twitter:url" content="https://ricardocosteira.com/" />
 <meta
   name="twitter:image"
-  content="https://ricardocosteira.com/assets/images/how-not-to-use-sealed-classes-and-livedata-for-state-management.jpg"
+  content="https://ricardocosteira.com/assets/images/glideing-your-way-into-recyclerview-state-invalidation.jpg"
 />
 <meta name="twitter:label1" content="Written by" />
 <meta name="twitter:data1" content="Ricardo Costeira" />
@@ -137,18 +137,18 @@
       "name": "Ricardo Costeira",
       "logo": "https://ricardocosteira.com/"
     },
-    "url": "https://ricardocosteira.com/how-not-to-use-sealed-classes-and-livedata-for-state-management",
+    "url": "https://ricardocosteira.com/glideing-your-way-into-recyclerview-state-invalidation",
     "image": {
       "@type": "ImageObject",
-      "url": "https://ricardocosteira.com/assets/images/how-not-to-use-sealed-classes-and-livedata-for-state-management.jpg",
+      "url": "https://ricardocosteira.com/assets/images/glideing-your-way-into-recyclerview-state-invalidation.jpg",
       "width": 2000,
       "height": 666
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": "https://ricardocosteira.com/how-not-to-use-sealed-classes-and-livedata-for-state-management"
+      "@id": "https://ricardocosteira.com/glideing-your-way-into-recyclerview-state-invalidation"
     },
-    "description": "A few months ago, I was washing my dishes while listening to episode 148 of the Fragmented podcast. In this episode, Donn Felker and Kaushik Gopal talk about architecture. To be specific, about an MVI-like architecture that Kaushik has been using. This architecture specifies that each screen has one and"
+    "description": "A few days ago, I worked on a sample project for a tutorial. It was a very simple app: a list of images, where you could click any image to view it in full screen. The code was simple, well structured, did what it had to do, and did it"
   }
 </script>
 
@@ -156,7 +156,7 @@
 <link
   rel="alternate"
   type="application/rss+xml"
-  title="How not to use sealed classes and LiveData for state management"
+  title="Glide'ing your way into RecyclerView state invalidation"
   href="/feed.xml"
 />
 
@@ -268,7 +268,7 @@ into the {body} of the default.hbs template -->
 
             <header class="post-full-header">
                 <section class="post-full-meta">
-                    <time class="post-full-meta-date" datetime="28 May 2019">28 May 2019</time>
+                    <time class="post-full-meta-date" datetime=" 9 March 2020"> 9 March 2020</time>
                     
                         <span class="date-divider">/</span>
                         
@@ -278,18 +278,22 @@ into the {body} of the default.hbs template -->
                         
                     
                 </section>
-                <h1 class="post-full-title">How not to use sealed classes and LiveData for state management</h1>
+                <h1 class="post-full-title">Glide'ing your way into RecyclerView state invalidation</h1>
                 
-                    <h2 class="post-full-subtitle">A journey about things that don’t work</h2>
+                    <h2 class="post-full-subtitle">And Glide'ing your way out too!</h2>
                 
             </header>
 
             
             <div class="post-full-image-caption">
-                <figure class="post-full-image" style="background-image: url(/assets/images/how-not-to-use-sealed-classes-and-livedata-for-state-management.jpg)"></figure>
+                <figure class="post-full-image" style="background-image: url(/assets/images/glideing-your-way-into-recyclerview-state-invalidation.jpg)"></figure>
+                
+                    I have no idea what that says. 
                 
                 
-                    Photo by <a href="https://unsplash.com/@heidi_sandstrom">Heidi Sandstrom.</a>
+                    
+                     Photo by <a href="https://unsplash.com/@christianw">Christian Wiediger</a>
+                    
                 
 
                 
@@ -302,222 +306,163 @@ into the {body} of the default.hbs template -->
 
             <section class="post-full-content">
                 <div class="kg-card-markdown">
-                    <p>A few months ago, I was washing my dishes while listening to <a href="https://fragmentedpodcast.com/episodes/148/">episode 148 of the Fragmented podcast</a>. In this episode, Donn Felker and Kaushik Gopal talk about architecture. To be specific, about an MVI-like architecture that Kaushik has been using.</p>
+                    <p>A few days ago, I worked on a sample project for a tutorial. It was a very simple app: a list of images, where you could click any image to view it in full screen. The code was simple, well structured, did what it had to do, and did it well. There was only one problem: the <code>RecyclerView</code> responsible for showing the image list was resetting its state, i.e., its scroll position, when you came back to it after checking an image in full screen.</p>
 
-<p>This architecture specifies that each screen has one and only one ViewModel, that exposes a single observable to the Activity or Fragment. This observable emits the screen’s state: when an update is required, the observable emits a new state object, which the view uses to update its state. To emit a state update, the ViewModel has to receive an event. Different events trigger different updates. Events then generate results, which generate the state updates. Each event class has a corresponding result class.</p>
+<h2 id="a-few-things-about-recyclerviews">A few things about RecyclerViews</h2>
 
-<p>There are many other nuances around the architecture, but these are the ones that matter for this article.</p>
+<p>Well, this can’t be right… I know I’m doing everything I’m supposed to do in order for the <code>RecyclerView</code> to be able to retain its scroll position!</p>
 
-<h3 id="the-epiphany">The Epiphany</h3>
+<p>Given the huge amount of code samples online explaining how to manually save and restore <code>RecyclerView</code> state, it seems that a lot of people think that this isn’t supposed to happen automatically. Well, it is, and it’s actually quite simple to do. You just have to make sure that:</p>
 
-<p>In the <a href="https://github.com/kaushikgopal/movies-usf">sample repo</a> that Kaushik provides, you can see this example of a view state class:</p>
+<ol>
+  <li>The <code>RecyclerView</code> has an ID.</li>
+  <li>You setup the <code>Adapter</code> with all the data <strong>before</strong> the <code>RecyclerView</code> goes through its first layout pass.</li>
+</ol>
 
-<pre><code class="language-kotlin">data class MSMovieViewState(
-    val searchBoxText: String? = null,
-    val searchedMovieTitle: String = "",
-    val searchedMovieRating: String = "",
-    val searchedMoviePoster: String = "",
-    val searchedMovieReference: MSMovie? = null,
-    val adapterList: List&lt;MSMovie&gt; = emptyList()
-)
-</code></pre>
+<p>The first one is simple: you just go to the layout and add an ID to the <code>RecyclerView</code>. By default, if a <code>View</code> doesn’t have an ID, its state <a href="https://android.googlesource.com/platform/frameworks/base/+/refs/heads/android10-c2f2-release/core/java/android/view/View.java#20264" target="_blank">won’t be stored</a>. This one’s actually hard to miss since you’re probably using an ID to access the view in the code.</p>
 
-<p>This is quite similar to a <a href="https://martinfowler.com/eaaDev/PresentationModel.html">presentation model</a>, but without the behavior definition. Also, as you can see, the class is immutable. This means that whenever there’s a new state update, the old values get copied into a new object. This new object also has the updated value for each specific state change. For example, given the events class:</p>
+<p>The second one is trickier. It’s not only a matter of setting up the <code>Adapter</code> before the <code>RecyclerView</code>. You need to make sure that when the <code>RecyclerView</code> is about to go through that first layout pass, it already has <strong>all the data</strong> it needs. If the layout pass starts and the <code>Adapter</code> doesn’t have the same data or is empty, the <code>RecyclerView</code>’s scroll position will get reset, as its state will be invalidated. So, for instance, if an app displaying a <code>RecyclerView</code> undergoes a config change and has to send an API request for data, it’ll be next to impossible for the data to arrive in time for the layout pass, which means that the <code>RecyclerView</code>’s scrolling position will inevitably be reset to the initial position.</p>
 
-<pre><code class="language-kotlin">sealed class MSMovieEvent {
-    object ScreenLoadEvent : MSMovieEvent()
-    data class SearchMovieEvent(val searchedMovieTitle: String = "") : MSMovieEvent()
-    data class AddToHistoryEvent(val searchedMovie: MSMovie) : MSMovieEvent()
-    data class RestoreFromHistoryEvent(val movieFromHistory: MSMovie) : MSMovieEvent()
-}
-</code></pre>
+<p>The solution here is simple: just cache the data. For example, if you have all the data cached in a <code>LiveData</code>, something like this will work:</p>
 
-<p>for a “add to history event”, you would have something like (this is an oversimplified version of the repo’s code):</p>
-
-<pre><code class="language-kotlin">val movie: MSMovie = result.packet.movie
-
-val newState = oldState.copy(
-  searchedMovieTitle = movie.title,
-  searchedMovieRating = movie.ratingSummary,
-  searchedMoviePoster = movie.posterUrl,
-  searchedMovieReference = movie)
-</code></pre>
-
-<p>When I saw this, my train of thought was more or less like “OK, this looks nice. Every state detail becomes enclosed in the same object. But this also means I have to redraw the whole UI on each update, even if I just change a simple text label. This seems rather heavy…”.</p>
-
-<p>I was really hyped about the architecture, but this bummed me out a little. There must be another way…</p>
-
-<p>And then it dawned on me: “What if I tried to use sealed classes for this?”</p>
-
-<h3 id="keep-it-simple-also-keep-it-working-correctly">Keep it simple. Also, keep it working correctly</h3>
-
-<p>Kaushik makes heavy usage of RxJava in this architecture. I love RxJava and think it’s amazing. Yet, like many, I also think that in most cases it’s an overkill. Especially when the framework already provides similar tools for the most common cases. Instead of using RxJava, I’ll be using LiveData for observability. For async work, I’ll use Coroutines. I also won’t be using events or results. Results seem rather redundant when you have observability. As for the events, they also seem to be superfluous: I have methods causing state changes. As such, observability should take care of everything for me, right? Eh, not quite, but we’ll get to that later.</p>
-
-<p>Before I start explaining what I’m about to do, I want to make something clear: I’m not recommending an architecture of any kind. I’m just testing a different approach to an already well defined architecture, and writing about the results. Nothing more. That being said, let’s get started.</p>
-
-<p>I’ll be implementing a Fragment that displays a RecyclerView with a list of user names. Each row has a checkbox that gets checked/unchecked either when you click on it or on the row itself. A button at the bottom of the view will update its label according to the number of selected users. I could’ve picked an even simpler example, but I really wanted to test the limits of this approach.</p>
-
-<p>So, I have two pieces of state here: the contents of the RecyclerView and the button label. I also have the actual user list internal state, i.e., if rows are checked or not. However, since we can consider this as the RecyclerView’s internal state, I’ll let it slide (otherwise, this approach is already failing…).</p>
-
-<p>I came up with the following sealed class:</p>
-
-<pre><code class="language-kotlin">sealed class RecyclerViewExampleViewState {
-  data class UsersListState(val users: List&lt;DisplayedUser&gt;) : RecyclerViewExampleViewState()
-  data class ButtonLabelState(val numberOfUsers: String) : RecyclerViewExampleViewState()
-  data class PossibleFailureState(val failure: Failure) : RecyclerViewExampleViewState()
-}
-</code></pre>
-
-<p>The ViewModel that does all the heavy lifting:</p>
-
-<pre><code class="language-kotlin">class RecyclerViewExampleViewModel @Inject constructor(
-  private val getUsers: GetUsers,
-  private val displayedUserMapper: DisplayedUserMapper
-) : BaseViewModel() {
-
-  val viewState: LiveData&lt;RecyclerViewExampleViewState&gt;
-    get() = _viewState
-
-  private val _viewState: MutableLiveData&lt;RecyclerViewExampleViewState&gt; =
-    MutableLiveData()
-
-  init {
-    getUsers()
-    updateButtonLabel(0)
-  }
-
-  fun updateButtonLabel(checkedNumber: Int) {
-    val label = if (checkedNumber &gt; 0) " ($checkedNumber)" else ""
-    _viewState.value = ButtonLabelState(label)
-  }
-
-  private fun getUsers() = getUsers(uiScope, UseCase.None()) {
-    it.either(
-      ::handleFailure,
-      ::handleUserList
-    )
-  }
-
-  private fun handleFailure(failure: Failure) {
-    _viewState.value = PossibleFailureState(failure)
-  }
-
-  private fun handleUserList(users: List&lt;User&gt;) {
-    val usersToDisplay = users.map { displayedUserMapper.mapToUI(it) }
-    _viewState.value = UsersListState(usersToDisplay)
-  }
-}
-</code></pre>
-
-<p>And the Fragment that updates its view on each state update:</p>
-
-<pre><code class="language-kotlin">class RecyclerViewExampleFragment
-: BaseFragment(), RecyclerViewRowClickListener&lt;DisplayedUser&gt; {
-
-  @Inject
-  lateinit var viewModel: RecyclerViewExampleViewModel
-
-  lateinit var adapter: UsersAdapter
-
-  override fun onCreateView(
-    inflater: LayoutInflater, container: ViewGroup?,
+<pre><code class="language-Kotlin">override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
+    val view = inflater.inflate(R.layout.fragment_list, container, false)
 
-    return inflater.inflate(R.layout.fragment_recycler_view_example, container, false)
+    val myAdapter = createAdapter()
+
+    setupRecyclerView(view, myAdapter)
+    observeViewModel(myAdapter)
+
+    return view
   }
 
-  override fun onActivityCreated(savedInstanceState: Bundle?) {
-    super.onActivityCreated(savedInstanceState)
+private fun setupRecyclerView(view: View, myAdapter: MyAdapter) {
+  view.recyclerView.adapter = myAdapter
 
-    progressBarLoading.show()
-    setRecyclerView()
+  // Other settings like listeners, setHasFixedSize, etc
+}
 
-    viewModel = createViewModel(this) {
-      observe(viewLifecycleOwner, viewState, ::renderViewState)
-    }
-  }
-
-  private fun setRecyclerView() {
-    prepareAdapter()
-    recyclerViewUsers.layoutManager = LinearLayoutManager(this.context)
-    recyclerViewUsers.adapter = adapter
-    recyclerViewUsers.setHasFixedSize(true)
-  }
-
-  private fun prepareAdapter() {
-    adapter = UsersAdapter(this)
-  }
-
-  private fun renderViewState(state: RecyclerViewExampleViewState) {
-
-    when (state) {
-      is UsersListState -&gt; renderUserList(state.users)
-      is ButtonLabelState -&gt; renderButton(state.numberOfUsers)
-      is PossibleFailureState -&gt; renderPossibleFailure(state.failure)
-    }
-  }
-
-  private fun renderUserList(users: List&lt;DisplayedUser&gt;) {
-    progressBarLoading.hide()
-    adapter.submitList(users)
-  }
-
-  private fun renderButton(selectedUsers: String) {
-    buttonDoStuff.text =
-      getString(R.string.button_label_do_stuff_with_users, selectedUsers)
-    buttonDoStuff.isEnabled = !selectedUsers.isBlank()
-  }
-
-  private fun renderPossibleFailure(failure: Failure) {
-    // TODO computer says no
-  }
-
-  override fun onRowClicked(item: DisplayedUser, position: Int) {
-    val checkedNumber = adapter.currentList.filter { it.isChecked }.count()
-    viewModel.updateButtonLabel(checkedNumber)
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    recyclerViewUsers.adapter = null
+private fun observeViewModel(myAdapter: MyAdapter) {
+  viewModel.myLiveData.observe(viewLifecycleOwner) {
+    myAdapter.submitList(it)
   }
 }
 </code></pre>
 
-<p>Let me walk you through the code. When the ViewModel inits, it immediately tells the repository to fetch the users (GitHub API). It then updates the button label. The Fragment uses the renderViewState method to observe the LiveData. For each different state update, renderViewState will trigger a different method. The Fragment also implements the RecyclerViewRowClickListener interface. This interface allows us to react to clicks on RecyclerView items. The Fragment does this in the onRowClicked method.</p>
+<p>By the time the <code>RecyclerView</code> starts getting drawn, the data is more than ready.</p>
 
-<p>This is the result:</p>
+<h2 id="hello-darkness-my-old-friend">Hello darkness my old friend</h2>
 
-<p><img src="assets/images/how-not-to-use-sealed-classes-and-livedata-for-state-management-1.png" alt="" /></p>
+<blockquote>
+  <p>“What am I missing?!”</p>
+</blockquote>
 
-<p>Everything seemingly works as I expected, except for one small (but important) detail. As you may have noticed, the onRowClicked method filters the user list. The filter counts the number of checked rows. Why? Because I can’t use this approach to update state based on a previous state. In other words, because each sealed class is independent. To me, this is the worst disadvantage of using a single LiveData to handle all these state classes: when I create a state update with a certain value, I lose access to it as soon as I set it as the LiveData’s value. Of course, I could always verify the LiveData value on the next state iteration. Unfortunately, I cannot guarantee that the previous update was the one I need. Suddenly, a simple class with the whole state just like Kaushik has seems worth it. Either that or I would need a different LiveData for this specific piece of state. This would also solve the internal RecyclerView state problem I talked about earlier.</p>
+<p>This was the question I asked myself for three days. My <code>RecyclerView</code> had an ID, and my data was cached and ready on time, so what could be wrong?</p>
 
-<p>Anyway, since the use of another LiveData would solve this, I decided to press on. I wasn’t ready to give up on this sealed classes idea. This time, I rotated the screen. And then this happened:</p>
+<p>I tried everything I could think of. Removing <code>setHasFixedSize(true)</code> from the <code>RecyclerView</code> setup, removing animations, using <code>RecyclerView.Adapter</code> instead of <code>ListAdapter</code>, <code>StaggeredGridLayout</code> instead of <code>GridLayout</code>, setting things up in different lifecycle methods and in different combinations, persisting everything… I even saved and restored the state manually at one point, but was not happy at all with the result (UI flickering). Going through the <code>RecyclerView</code>’s code, I could see that its state was indeed being saved and correctly retrieved, but later invalidated. I hadn’t felt this mad at Android for years!</p>
 
-<p><img src="assets/images/how-not-to-use-sealed-classes-and-livedata-for-state-management-2.png" alt="" /></p>
+<p>As I was close to give up on fixing the bug and on my software engineering career in general, I began browsing Slack channels. In one specific channel, I found something that <a href="https://twitter.com/JonFHancock" target="_blank">Jon F Hancock</a> said when trying to help someone else with a different <code>RecyclerView</code> problem:</p>
 
-<p>Dammit. Why?</p>
+<blockquote>
+  <p>If the size of your RecyclerView depends on its children, you shouldn’t set that to true.</p>
+</blockquote>
 
-<p>Well, I forgot a very important aspect of LiveData. Each new observer that subscribes to a LiveData receives its <strong>latest</strong> value. Here, the Fragment gets destroyed on rotation, and a new Fragment starts observing the LiveData. The last value emitted by the LiveData was the button label update. That’s why the label is correct, but the list is empty. If I rotate the phone before clicking on any rows, the list will appear since the getUsers API request is async and finishes after the updateButtonLabel call. On the other hand, the button label will show the placeholder text instead of the correct value.</p>
+<p>The “that” in the quote refers to <code>setHasFixedSize(true)</code>. But the bit that actually caught my attention was the first part: “<em>If the size of your RecyclerView depends on its children (…)</em>”.</p>
 
-<p>So, ways to solve this. One possibility is, again, different LiveData variables for each sealed class. This is not the most desirable solution though. If we keep adding new LiveData variables, both code maintenance and testing complexity might increase. This was one of the motives between Kaushik’s architecture, if I recall correctly. Another, more sane possibility is to trigger view state updates in the Fragment’s onResume method or similar. Suddenly, events make sense. The third option I can think of breaks my heart: use a class for the whole state, instead of sealed classes (Sorry Kaushik, I will never doubt your work again).</p>
+<p>Holy crap. Could it be?</p>
 
-<h3 id="final-thoughts">Final Thoughts</h3>
+<h2 id="i-can-see-clearly-now-the-rain-is-gone">I can see clearly now, the rain is gone</h2>
 
-<p>I ended up using a single class to the whole state . With the LiveData and sealed classes setup, I got to a point where I had a different LiveData for each sealed class, which defeats the purpose of the whole thing. I even had to stop ignoring the RecyclerView’s internal state, since it gets reset on configuration changes.</p>
+<p>What Jon said was related to the <code>Recyclerview</code>’s size. However, it got me thinking about the size of the <code>RecyclerView</code>’s children.</p>
 
-<p>I’m also using events, although there was no functional need for them in this case: since LiveData will always emit the latest global state for the view, I don’t need to cause an explicit state update on configuration change. Regardless, they do make the code look more structured to me. I like having all state changing events going through the same method. It feels like this should help in keeping things more or less simple on a more complex UI. In the end, the architecture became a simplified version of the one presented in the Fragmented podcast.</p>
+<p>So, here’s the layout for the <code>RecyclerView</code> items:</p>
 
-<p>Although redrawing the whole UI seems exaggerated, the process is actually very smooth. While this might not hold for a more complex UI, it should be able to handle most cases.</p>
+<pre><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/image_view_image"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:adjustViewBounds="true"
+  android:contentDescription="@null"
+  tools:src="@tools:sample/backgrounds/scenic" /&gt;
+</code></pre>
 
-<p>You can find all the code (in its final state) in my <a href="https://github.com/rcosteira79/AndroidMultiModuleCleanArchTemplate">multi module clean architecture template</a>, in the <code>RecyclerViewExample</code> module.</p>
+<p>At a first glance, you probably won’t see anything unusual. And there isn’t! It’s a pretty standard setup for an <code>ImageView</code>. However, this innocent code was masking a nasty bug.</p>
 
-<p>As I said before, this is not an architecture recommendation. While this might work for some cases, other alternatives such as databinding or multiple LiveData variables managed by a MediatorLiveData (<a href="https://medium.com/@Zhuinden/if-there-are-many-events-id-just-combine-them-together-with-a-mediatorlivedata-or-with-rx-a0494953a578">as suggested by Gabor Varadi</a>) might even be a better fit. I’m a fan of this approach, but it’s up to you to figure out what’s best for your specific case.</p>
+<p>The images that feed the <code>RecyclerView</code> come from an image API. The images are random, and are loaded by <strong>Glide</strong>. Here’s the extension function for image loading:</p>
 
-<hr />
+<pre><code class="language-Kotlin">fun ImageView.load(imageAddress: String) {
+  Glide.with(this)
+      .load(imageAddress)
+      .into(this)
+}
+</code></pre>
 
-<p>Thank you very much for reading the article. I really hope it was worth it! Do you have any ideas? Would you do something differently? If so, please leave a comment or reach out on Twitter. See you next time!</p>
+<p>Glide is smart enough to cache unmodified data, so it won’t keep requesting the images from the API. However, Glide caches the images with their original size, so it will still have to resize them to fit in the <code>ImageView</code>. Not only that, but since the xml layout is setting the height for the <code>ImageView</code> as <code>wrap_content</code>, and Glide is not specifying any default size either, the latter will have to calculate the height of <strong>each</strong> image it loads.</p>
+
+<p>This calculation takes its time, and while Glide is busy with it, the <code>RecyclerView</code> is setting up its layout. When it’s ready to layout its children, it gets the height of each item so that it knows the space each of them will occupy, i.e., how many <code>ViewHolder</code> instances it needs. The <code>RecyclerView</code> reaches this step in a lot less time than Glide takes to be done with the image size calculations. As such, by having the height of the <code>ImageView</code> declared as <code>wrap_content</code>, its actual measured height <strong>will default to zero</strong> until it’s finally displaying an image.</p>
+
+<p>This effectively messes up the whole logic that comes afterwards:</p>
+
+<ol>
+  <li>The <code>RecyclerView</code>uses the scrolling position that comes from the previous state to know from which view it should start displaying the items.</li>
+  <li>Using the current position and the size of the items, the <code>RecyclerView</code> figures out how many more items it can show. It first goes from the current position to the last item, and then from the current position to the first item.</li>
+  <li>Since the item size is coming out as zero, it’ll basically try to set <strong>every item</strong> in the item list as a visible item. This will then make it so that the previous state is invalidated, forcing the <code>RecyclerView</code>to reset everything and discard the scrolling position, drawing the items from the beginning.</li>
+</ol>
+
+<p>Uff! How can you solve this then? There are a few options. You can:</p>
+
+<ul>
+  <li>Hardcode the height in the layout</li>
+</ul>
+
+<pre><code class="language-xml">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/image_view_doggo"
+  android:layout_width="match_parent"
+  android:layout_height="200dp"
+  android:adjustViewBounds="true"
+  android:contentDescription="@null"
+  tools:src="@tools:sample/backgrounds/scenic" /&gt;
+</code></pre>
+
+<ul>
+  <li>Override the view size with Glide</li>
+</ul>
+
+<pre><code class="language-Kotlin">fun ImageView.load(imageAddress: String) {
+  Glide.with(this)
+      .load(imageAddress)
+      .override(Target.SIZE_ORIGINAL, 200)
+      .into(this)
+}
+</code></pre>
+
+<ul>
+  <li>Add a placeholder with Glide, so that the <code>RecyclerView</code> uses its height</li>
+</ul>
+
+<pre><code class="language-Kotlin">fun ImageView.load(imageAddress: String) {
+  Glide.with(this)
+      .load(imageAddress)
+      .placeholder(R.drawable.placeholder)
+      .into(this)
+}
+</code></pre>
+
+<p>The main point here is that, as long as you set the height of the view <strong>before</strong> the <code>RecyclerView</code> tries to layout its children, you’re good!</p>
+
+<h2 id="final-thoughts">Final thoughts</h2>
+
+<p>That’s it for this article. Congratulations on your retained <code>RecyclerView</code> state! I hope this was helpful, or that you at least learned something new. Feel free to talk about it either in the comment section down below or at Twitter.</p>
+
+<p>Until next time!</p>
 
                 </div>
             </section>
@@ -555,8 +500,8 @@ val newState = oldState.copy(
                     <div id="disqus_thread"></div>
                     <script>
                         var disqus_config = function () {
-                            this.page.url = 'https://ricardocosteira.com/how-not-to-use-sealed-classes-and-livedata-for-state-management';
-                            this.page.identifier = '/how-not-to-use-sealed-classes-and-livedata-for-state-management';
+                            this.page.url = 'https://ricardocosteira.com/glideing-your-way-into-recyclerview-state-invalidation';
+                            this.page.identifier = '/glideing-your-way-into-recyclerview-state-invalidation';
                         };
                         (function() {
                             var d = document, s = d.createElement('script');
@@ -601,11 +546,6 @@ val newState = oldState.copy(
                                 
                                   
                                     
-                                        
-                                        
-                                            <li><a href="/glideing-your-way-into-recyclerview-state-invalidation">Glide'ing your way into RecyclerView state invalidation</a></li>
-                                        
-                                    
                                   
                                 
                                   
@@ -627,6 +567,11 @@ val newState = oldState.copy(
                                   
                                 
                                   
+                                    
+                                        
+                                        
+                                            <li><a href="/how-not-to-use-sealed-classes-and-livedata-for-state-management">How not to use sealed classes and LiveData for state management</a></li>
+                                        
                                     
                                   
                                 
@@ -653,53 +598,6 @@ val newState = oldState.copy(
 
             <!-- If there's a next post, display it using the same markup included from - partials/post-card.hbs -->
             
-                
-
-    <article class="post-card post-template">
-        
-            <a class="post-card-image-link" href="/going-with-the-flow-rxjava-to-coroutines-part-1">
-                <div class="post-card-image" style="background-image: url(/assets/images/going-with-the-flow-rxjava-to-coroutines-part-1.jpg)"></div>
-            </a>
-        
-        <div class="post-card-content">
-            <a class="post-card-content-link" href="/going-with-the-flow-rxjava-to-coroutines-part-1">
-                <header class="post-card-header">
-                    
-                        
-                            
-                                <span class="post-card-tags">Android</span>
-                            
-                        
-                    
-
-                    <h2 class="post-card-title">Going with the Flow: from RxJava to Kotlin coroutines - Part 1</h2>
-                </header>
-                <section class="post-card-excerpt">
-                    
-                        <p>I’ve been playing around with Kotlin’s coroutines library. I had some trouble wrapping my head around the whole coroutine concept, mainly because I was consistently looking out for RxJava resemblances. Well, the truth</p>
-                    
-                </section>
-            </a>
-            <footer class="post-card-meta">
-                <!-- 
-                    
-                        
-                        <span class="post-card-author">
-                            <a href="/author/ricardo/">Ricardo Costeira</a>
-                        </span>
-                    
-                 -->
-                <span class="reading-time">
-                    
-                    
-                      12 min read
-                    
-                </span>
-            </footer>
-        </div>
-    </article>
-
-            
 
             <!-- If there's a previous post, display it using the same markup included from - partials/post-card.hbs -->
             
@@ -707,28 +605,30 @@ val newState = oldState.copy(
 
     <article class="post-card post-template">
         
-            <a class="post-card-image-link" href="/encapsulate-and-abstract-for-future-proof-software">
-                <div class="post-card-image" style="background-image: url(/assets/images/encapsulate-and-abstract-for-future-proof-software.jpg)"></div>
+            <a class="post-card-image-link" href="/my-talk-about-kotlin-flow-at-devfest-leiria-2019">
+                <div class="post-card-image" style="background-image: url(/assets/images/talk-devfest-leiria-2.jpg)"></div>
             </a>
         
         <div class="post-card-content">
-            <a class="post-card-content-link" href="/encapsulate-and-abstract-for-future-proof-software">
+            <a class="post-card-content-link" href="/my-talk-about-kotlin-flow-at-devfest-leiria-2019">
                 <header class="post-card-header">
                     
                         
                             
-                                <span class="post-card-tags">Android</span>
+                               <span class="post-card-tags">Android</span>
+                            
+                        
+                            
+                                <span class="post-card-tags">Talks</span>
                             
                         
                     
 
-                    <h2 class="post-card-title">Encapsulate and abstract for future proof software</h2>
+                    <h2 class="post-card-title">My talk about Kotlin Flow at DevFest Leiria 2019</h2>
                 </header>
                 <section class="post-card-excerpt">
                     
-                        <p>Change will always affect your software. No matter the domain, the uses cases, the developers, or even the users. Change is the one constant in software development.
-
-</p>
+                        <p>On December 14 of 2019, I gave a talk about Kotlin Flow at DevFest Leiria. My main motivation for wanting to give this talk was simple: reactive programming is here to stay. Most</p>
                     
                 </section>
             </a>
@@ -744,7 +644,7 @@ val newState = oldState.copy(
                 <span class="reading-time">
                     
                     
-                      3 min read
+                      1 min read
                     
                 </span>
             </footer>
@@ -771,12 +671,12 @@ val newState = oldState.copy(
     </a>
   </div>
   <span class="floating-header-divider">&mdash;</span>
-  <div class="floating-header-title">How not to use sealed classes and LiveData for state management</div>
+  <div class="floating-header-title">Glide'ing your way into RecyclerView state invalidation</div>
   <div class="floating-header-share">
     <div class="floating-header-share-label">Share</div>
     <a
       class="floating-header-share-tw"
-      href="https://twitter.com/share?text=How+not+to+use+sealed+classes+and+LiveData+for+state+management&amp;url=https://ricardocosteira.com/how-not-to-use-sealed-classes-and-livedata-for-state-management"
+      href="https://twitter.com/share?text=Glide%27ing+your+way+into+RecyclerView+state+invalidation&amp;url=https://ricardocosteira.com/glideing-your-way-into-recyclerview-state-invalidation"
       onclick="window.open(this.href, 'share-twitter', 'width=550,height=235');return false;"
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M30.063 7.313c-.813 1.125-1.75 2.125-2.875 2.938v.75c0 1.563-.188 3.125-.688 4.625a15.088 15.088 0 0 1-2.063 4.438c-.875 1.438-2 2.688-3.25 3.813a15.015 15.015 0 0 1-4.625 2.563c-1.813.688-3.75 1-5.75 1-3.25 0-6.188-.875-8.875-2.625.438.063.875.125 1.375.125 2.688 0 5.063-.875 7.188-2.5-1.25 0-2.375-.375-3.375-1.125s-1.688-1.688-2.063-2.875c.438.063.813.125 1.125.125.5 0 1-.063 1.5-.25-1.313-.25-2.438-.938-3.313-1.938a5.673 5.673 0 0 1-1.313-3.688v-.063c.813.438 1.688.688 2.625.688a5.228 5.228 0 0 1-1.875-2c-.5-.875-.688-1.813-.688-2.75 0-1.063.25-2.063.75-2.938 1.438 1.75 3.188 3.188 5.25 4.25s4.313 1.688 6.688 1.813a5.579 5.579 0 0 1 1.5-5.438c1.125-1.125 2.5-1.688 4.125-1.688s3.063.625 4.188 1.813a11.48 11.48 0 0 0 3.688-1.375c-.438 1.375-1.313 2.438-2.563 3.188 1.125-.125 2.188-.438 3.313-.875z"/></svg>
@@ -784,15 +684,15 @@ val newState = oldState.copy(
     </a>
     <a
       class="floating-header-share-fb"
-      href="https://www.facebook.com/sharer/sharer.php?u=https://ricardocosteira.com/how-not-to-use-sealed-classes-and-livedata-for-state-management"
+      href="https://www.facebook.com/sharer/sharer.php?u=https://ricardocosteira.com/glideing-your-way-into-recyclerview-state-invalidation"
       onclick="window.open(this.href, 'share-facebook','width=580,height=296');return false;"
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M19 6h5V0h-5c-3.86 0-7 3.14-7 7v3H8v6h4v16h6V16h5l1-6h-6V7c0-.542.458-1 1-1z"/></svg>
     </a>
     <a
       class="floating-header-share-lkd"
-      href="https://www.linkedin.com/shareArticle/?mini=true&url=https://ricardocosteira.com/how-not-to-use-sealed-classes-and-livedata-for-state-management
-        &title=How not to use sealed classes and LiveData for state management
+      href="https://www.linkedin.com/shareArticle/?mini=true&url=https://ricardocosteira.com/glideing-your-way-into-recyclerview-state-invalidation
+        &title=Glide'ing your way into RecyclerView state invalidation
         &source=https://ricardocosteira.com"
       onclick="window.open(this.href, 'share-linkedin','width=500,height=500');return false;"
     >
