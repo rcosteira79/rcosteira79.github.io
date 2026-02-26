@@ -15,7 +15,7 @@ pnpm build         # Build static site to dist/
 pnpm preview       # Preview the built site locally
 ```
 
-Note: The system may have an old Node.js v12 at `/usr/local/bin/node`. Use the Homebrew-managed Node at `/usr/local/Cellar/node/25.6.1_1/bin/node` if commands fail due to Node version issues.
+Node is managed via nvm. If commands fail, run `source ~/.nvm/nvm.sh` first (or add it to your shell profile).
 
 ## Writing Posts
 
