@@ -1,31 +1,28 @@
-# OS X
-*DS_Store*
+# build output
+dist/
 
-# Jekyll build
-/_site/
-.jekyll-metadata
-#Gemfile.lock
+# generated types
+.astro/
 
-# webstorm
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
 .idea/
 
-# others
-*.swp
+# pagefind
 
-# site build
-*.gem
-*.rbc
-.bundle
-.config
-coverage
-InstalledFiles
-lib/bundler/man
-pkg
-rdoc
-spec/reports
-test/tmp
-test/version_tmp
-tmp
-vendor
-Gemfile.lock
-node_modules
+public/pagefind
