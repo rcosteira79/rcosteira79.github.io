@@ -4,52 +4,55 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the **production output repository** for the blog at [ricardocosteira.com](https://ricardocosteira.com). It is hosted on GitHub Pages. The **source** that generates this repository is at https://github.com/rcosteira79/jasper2 (a Jekyll-based Ghost Casper theme adaptation).
-
-Blog posts are pre-generated static HTML files committed directly to this repo — they are not templates or markdown source files.
+Personal blog and portfolio at [rcosteira79.github.io](https://rcosteira79.github.io), built with Astro v5 and the AstroPaper v5.5.1 theme. Deployed automatically to GitHub Pages via GitHub Actions on every push to `master`.
 
 ## Commands
 
-### CSS Build Pipeline
-
 ```bash
-npm install        # Install dependencies
-npx gulp           # Build CSS and start watcher + live reload (port 1234)
+pnpm install       # Install dependencies
+pnpm dev           # Start dev server at http://localhost:4321
+pnpm build         # Build static site to dist/
+pnpm preview       # Preview the built site locally
 ```
 
-The Gulp pipeline processes `assets/css/*.css` through PostCSS (imports, custom properties, color functions, autoprefixer, minification) and outputs to `assets/built/`.
+Note: The system may have an old Node.js v12 at `/usr/local/bin/node`. Use the Homebrew-managed Node at `/usr/local/Cellar/node/25.6.1_1/bin/node` if commands fail due to Node version issues.
 
-### Deployment
+## Writing Posts
 
-```bash
-rake site:build    # Build with Jekyll
-rake site:serve    # Serve locally at http://localhost:4000
-rake site:deploy   # Build and push to gh-pages branch
+Posts live in `src/data/blog/` as Markdown files. Frontmatter schema (from `src/content.config.ts`):
+
+```markdown
+---
+author: Ricardo Costeira        # optional, defaults to SITE.author
+pubDatetime: 2026-02-26T00:00:00Z  # required, ISO datetime
+modDatetime: 2026-02-27T00:00:00Z  # optional, last modified
+title: Post Title               # required
+featured: false                 # shows on homepage featured section
+draft: false                    # true = excluded from listings/feeds
+tags:
+  - android
+description: Short description  # required, used in listings and SEO
+---
+
+Post body in Markdown...
 ```
 
-Deployment requires `GIT_NAME`, `GIT_EMAIL`, and `GH_TOKEN` environment variables. The Rakefile handles Travis CI auto-detection.
+The slug is derived from the filename automatically — do not include a `slug` field.
 
 ## Architecture
 
-### Repository Role
+- **`src/config.ts`** — site-wide settings: title, author, description, URL, posts per page, social links
+- **`src/constants.ts`** — social links array
+- **`src/data/blog/`** — blog posts (Markdown)
+- **`src/pages/`** — page routes: `index.astro` (blog listing), `about.md` (about/CV), `projects.astro` (hidden, not in nav)
+- **`src/layouts/`** — page layout components
+- **`src/components/`** — UI components including `Header.astro` (nav is hardcoded here)
+- **`.github/workflows/deploy.yml`** — builds and deploys to GitHub Pages on push to master
 
-This repo holds **generated output only**. The workflow is:
-1. Content is authored and built in the `jasper2` source repo
-2. The output (static HTML) is committed here
-3. GitHub Pages serves this repo at the custom domain in `CNAME`
+## Navigation
 
-### Key Files
+Nav links are hardcoded in `src/components/Header.astro`. To add a page to the nav, add an `<a>` tag there. The `/projects` page is intentionally not linked.
 
-- `assets/css/screen.edited.css` — CSS customizations on top of the Casper theme
-- `assets/css/screen.css` — Main Casper theme CSS (do not edit directly)
-- `gulpfile.js` — PostCSS pipeline: processes source CSS → `assets/built/`
-- `Rakefile` — Jekyll build and GitHub Pages deployment automation
-- `assets/js/` — Client-side libraries: Prism.js (syntax highlighting), infinite scroll, FitVids
+## Deployment
 
-### Content Structure
-
-- Root-level `.html` files — individual blog posts
-- `index.html` — blog listing page
-- `about/index.html` — about page
-- `tag/` — tag index pages with their own feeds
-- `feed.xml` / `atom.xml` — RSS/Atom feeds
+Pushing to `master` triggers GitHub Actions, which runs `pnpm build` and deploys `dist/` to GitHub Pages. Requires GitHub repo Settings → Pages → Source set to "GitHub Actions".

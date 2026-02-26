@@ -14,7 +14,7 @@ export const SITE = {
   editPost: {
     enabled: false,
     text: "Edit page",
-    url: "https://github.com/rcosteira79/rcosteira79.github.io/edit/master/",
+    url: "https://github.com/rcosteira79/rcosteira79.github.io/edit/master/src/data/blog",
   },
   dynamicOgImage: true,
   dir: "ltr", // "rtl" | "auto"
