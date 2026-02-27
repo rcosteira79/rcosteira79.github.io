@@ -25,6 +25,8 @@ Then large language models showed up and I got that feeling again — the one I 
 
 That feeling is usually a sign I should be writing.
 
-So here we are. The blog is back, rebuilt from scratch (Astro this time, no more Jekyll held together with prayers). I'll probably write about Android still. I'll definitely write about AI and where these two worlds are starting to collide. And I'll write about whatever else grabs me.
+So here we are. The blog is back, rebuilt from scratch (Astro this time, no more Jekyll held together with prayers). Funnily enough, the rebuild itself was the first real test of the new AI-assisted workflow — I had Claude set the whole thing up, and it took an afternoon instead of the usual "I'll get to it eventually" three years. Progress.
+
+As for what I'll write about: mostly Android. That's still where I spend most of my time, and there's always something worth digging into — architecture, Kotlin quirks, the occasional hill I'm willing to die on. Whether AI ends up woven into those posts or not, I genuinely don't know yet. Sometimes it'll be relevant. Sometimes it won't. I'm not going to force it either way.
 
 No promises on frequency. But the buzz is back, and that's usually enough.
