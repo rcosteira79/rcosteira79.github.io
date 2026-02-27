@@ -66,11 +66,18 @@ jobs:
           BUFFER_API_TOKEN: ${{ secrets.BUFFER_API_TOKEN }}
           SITE_URL: https://rcosteira79.github.io
         run: |
-          NEW_POSTS=$(git diff HEAD~1 HEAD --name-only --diff-filter=A -- src/data/blog/)
-          if [ -n "$NEW_POSTS" ]; then
-            echo "New posts detected:"
-            echo "$NEW_POSTS"
-            node scripts/share-post.mjs $NEW_POSTS
-          else
-            echo "No new posts in this push."
+          if ! git rev-parse HEAD~1 >/dev/null 2>&1; then
+            echo "No previous commit found, skipping share step."
+            exit 0
           fi
+          NEW_POSTS=$(git diff HEAD~1 HEAD --name-only --diff-filter=A -- src/data/blog/)
+          if [ -z "$NEW_POSTS" ]; then
+            echo "No new posts in this push."
+            exit 0
+          fi
+          echo "New posts detected:"
+          echo "$NEW_POSTS"
+          while IFS= read -r post_file; do
+            [ -z "$post_file" ] && continue
+            node scripts/share-post.mjs "$post_file"
+          done <<< "$NEW_POSTS"

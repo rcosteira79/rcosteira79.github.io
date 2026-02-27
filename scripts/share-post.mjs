@@ -10,11 +10,13 @@
 //   SITE_URL          — defaults to https://rcosteira79.github.io
 
 import { readFileSync } from "node:fs";
-import { resolve, basename } from "node:path";
+import { fileURLToPath } from "node:url";
+import { resolve, basename, dirname, join } from "node:path";
 
 const DRY_RUN = process.argv.includes("--dry-run");
 const BUFFER_API_TOKEN = process.env.BUFFER_API_TOKEN;
 const SITE_URL = (process.env.SITE_URL ?? "https://rcosteira79.github.io").replace(/\/$/, "");
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ---------------------------------------------------------------------------
 // Frontmatter parser
@@ -43,7 +45,7 @@ function parseFrontmatter(fileContent) {
 // Expects the value to be a template literal: socialTemplate: `...`
 // ---------------------------------------------------------------------------
 function readSocialTemplate() {
-  const config = readFileSync("src/config.ts", "utf-8");
+  const config = readFileSync(join(__dirname, "../src/config.ts"), "utf-8");
   const match = config.match(/socialTemplate:\s*`([\s\S]*?)`/);
   if (!match) {
     throw new Error("socialTemplate not found in src/config.ts");
@@ -123,12 +125,15 @@ async function main() {
     const content = readFileSync(resolve(file), "utf-8");
     const fm = parseFrontmatter(content);
 
-    if (fm.draft === "true") {
+    if (["true", "yes", "on"].includes((fm.draft ?? "").toLowerCase())) {
       console.log(`Skipping draft: ${file}`);
       continue;
     }
 
-    const slug = basename(file, ".md");
+    const slug = basename(file, ".md")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
     const url = `${SITE_URL}/posts/${slug}/`;
     const messageTemplate = fm.socialPost ?? template;
     const message = interpolate(messageTemplate, {

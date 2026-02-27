@@ -18,6 +18,8 @@ const blog = defineCollection({
       ogImage: image().or(z.string()).optional(),
       description: z.string(),
       canonicalURL: z.string().optional(),
+      // Optional: override the default socialTemplate from config for this post.
+      // Must be a single-line string. Supports {title}, {description}, {url} variables.
       socialPost: z.string().optional(),
       hideEditPost: z.boolean().optional(),
       timezone: z.string().optional(),
