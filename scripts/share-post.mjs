@@ -1,0 +1,153 @@
+#!/usr/bin/env node
+// scripts/share-post.mjs
+//
+// Usage:
+//   node scripts/share-post.mjs <file1.md> [file2.md] ...
+//   node scripts/share-post.mjs --dry-run <file1.md> ...
+//
+// Environment variables:
+//   BUFFER_API_TOKEN  — required (unless --dry-run)
+//   SITE_URL          — defaults to https://rcosteira79.github.io
+
+import { readFileSync } from "node:fs";
+import { resolve, basename } from "node:path";
+
+const DRY_RUN = process.argv.includes("--dry-run");
+const BUFFER_API_TOKEN = process.env.BUFFER_API_TOKEN;
+const SITE_URL = (process.env.SITE_URL ?? "https://rcosteira79.github.io").replace(/\/$/, "");
+
+// ---------------------------------------------------------------------------
+// Frontmatter parser
+// Handles simple single-line key: value pairs. Values may contain colons.
+// Note: socialPost must be a single-line value (quote it if it contains
+// special YAML characters like colons or leading/trailing spaces).
+// ---------------------------------------------------------------------------
+function parseFrontmatter(fileContent) {
+  const match = fileContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) return {};
+
+  const result = {};
+  for (const line of match[1].split("\n")) {
+    const colonIdx = line.indexOf(":");
+    if (colonIdx === -1) continue;
+    const key = line.slice(0, colonIdx).trim();
+    const raw = line.slice(colonIdx + 1).trim();
+    // Strip surrounding quotes if present
+    result[key] = raw.replace(/^["'`]|["'`]$/g, "");
+  }
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Reads socialTemplate from src/config.ts
+// Expects the value to be a template literal: socialTemplate: `...`
+// ---------------------------------------------------------------------------
+function readSocialTemplate() {
+  const config = readFileSync("src/config.ts", "utf-8");
+  const match = config.match(/socialTemplate:\s*`([\s\S]*?)`/);
+  if (!match) {
+    throw new Error("socialTemplate not found in src/config.ts");
+  }
+  return match[1];
+}
+
+// ---------------------------------------------------------------------------
+// Template interpolation — replaces {title}, {description}, {url}
+// ---------------------------------------------------------------------------
+function interpolate(template, vars) {
+  return template
+    .replace(/\{title\}/g, vars.title ?? "")
+    .replace(/\{description\}/g, vars.description ?? "")
+    .replace(/\{url\}/g, vars.url ?? "");
+}
+
+// ---------------------------------------------------------------------------
+// Buffer API
+//
+// IMPORTANT: Buffer's public API is in beta. Verify these endpoints against
+// the current docs at https://buffer.com/developers before running.
+// The expected request shape is based on Buffer's published API design.
+// ---------------------------------------------------------------------------
+async function fetchBufferProfileIds(token) {
+  const res = await fetch("https://api.bufferapp.com/1/profiles.json", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    throw new Error(`Buffer /profiles failed (${res.status}): ${await res.text()}`);
+  }
+  const profiles = await res.json();
+  return profiles.map(p => p.id);
+}
+
+async function postToBuffer(token, profileIds, text) {
+  const body = new URLSearchParams({ text, now: "true" });
+  profileIds.forEach(id => body.append("profile_ids[]", id));
+
+  const res = await fetch("https://api.bufferapp.com/1/updates/create.json", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: body.toString(),
+  });
+  if (!res.ok) {
+    throw new Error(`Buffer create post failed (${res.status}): ${await res.text()}`);
+  }
+  return res.json();
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+async function main() {
+  const files = process.argv.slice(2).filter(a => !a.startsWith("--"));
+
+  if (files.length === 0) {
+    console.log("No new posts to share.");
+    return;
+  }
+
+  const template = readSocialTemplate();
+
+  let profileIds = [];
+  if (!DRY_RUN) {
+    if (!BUFFER_API_TOKEN) {
+      throw new Error("BUFFER_API_TOKEN environment variable is not set.");
+    }
+    profileIds = await fetchBufferProfileIds(BUFFER_API_TOKEN);
+    console.log(`Sharing to ${profileIds.length} Buffer profile(s).`);
+  }
+
+  for (const file of files) {
+    const content = readFileSync(resolve(file), "utf-8");
+    const fm = parseFrontmatter(content);
+
+    if (fm.draft === "true") {
+      console.log(`Skipping draft: ${file}`);
+      continue;
+    }
+
+    const slug = basename(file, ".md");
+    const url = `${SITE_URL}/posts/${slug}/`;
+    const messageTemplate = fm.socialPost ?? template;
+    const message = interpolate(messageTemplate, {
+      title: fm.title,
+      description: fm.description,
+      url,
+    });
+
+    if (DRY_RUN) {
+      console.log(`\n[DRY RUN] File: ${file}`);
+      console.log(`Message:\n---\n${message}\n---`);
+    } else {
+      await postToBuffer(BUFFER_API_TOKEN, profileIds, message);
+      console.log(`✓ Posted to Buffer: "${fm.title}"`);
+    }
+  }
+}
+
+main().catch(err => {
+  console.error(`Error: ${err.message}`);
+  process.exit(1);
+});
