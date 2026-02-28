@@ -4,6 +4,7 @@
 // Usage:
 //   node scripts/share-post.mjs <file1.md> [file2.md] ...
 //   node scripts/share-post.mjs --dry-run <file1.md> ...
+//   node scripts/share-post.mjs --schedule <file1.md> ...   (schedules 7 days out, for testing)
 //
 // Environment variables:
 //   BUFFER_API_TOKEN  — required (unless --dry-run)
@@ -14,6 +15,7 @@ import { fileURLToPath } from "node:url";
 import { resolve, basename, dirname, join } from "node:path";
 
 const DRY_RUN = process.argv.includes("--dry-run");
+const SCHEDULE = process.argv.includes("--schedule");
 const BUFFER_API_TOKEN = process.env.BUFFER_API_TOKEN;
 const SITE_URL = (process.env.SITE_URL ?? "https://rcosteira79.github.io").replace(/\/$/, "");
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -81,8 +83,11 @@ async function fetchBufferProfileIds(token) {
   return profiles.map(p => p.id);
 }
 
-async function postToBuffer(token, profileIds, text) {
-  const body = new URLSearchParams({ text, now: "true" });
+async function postToBuffer(token, profileIds, text, schedule = false) {
+  const scheduledAt = String(Math.floor((Date.now() + 7 * 24 * 60 * 60 * 1000) / 1000));
+  const body = new URLSearchParams(
+    schedule ? { text, scheduled_at: scheduledAt } : { text, now: "true" }
+  );
   profileIds.forEach(id => body.append("profile_ids[]", id));
 
   const res = await fetch("https://api.bufferapp.com/1/updates/create.json", {
@@ -146,8 +151,12 @@ async function main() {
       console.log(`\n[DRY RUN] File: ${file}`);
       console.log(`Message:\n---\n${message}\n---`);
     } else {
-      await postToBuffer(BUFFER_API_TOKEN, profileIds, message);
-      console.log(`✓ Posted to Buffer: "${fm.title}"`);
+      await postToBuffer(BUFFER_API_TOKEN, profileIds, message, SCHEDULE);
+      if (SCHEDULE) {
+        console.log(`✓ Scheduled on Buffer (7 days out): "${fm.title}"`);
+      } else {
+        console.log(`✓ Posted to Buffer: "${fm.title}"`);
+      }
     }
   }
 }
