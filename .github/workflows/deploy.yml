@@ -70,14 +70,31 @@ jobs:
             echo "No previous commit found, skipping share step."
             exit 0
           fi
-          NEW_POSTS=$(git diff HEAD~1 HEAD --name-only --diff-filter=A -- src/data/blog/)
-          if [ -z "$NEW_POSTS" ]; then
+
+          # Newly added posts (published directly without a draft commit)
+          ADDED=$(git diff HEAD~1 HEAD --name-only --diff-filter=A -- src/data/blog/)
+
+          # Modified posts where draft flipped from true to false
+          PUBLISHED=""
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            if git show HEAD~1:"$file" 2>/dev/null | grep -qE '^draft:[[:space:]]*true'; then
+              if ! grep -qE '^draft:[[:space:]]*true' "$file" 2>/dev/null; then
+                PUBLISHED="$PUBLISHED"$'\n'"$file"
+              fi
+            fi
+          done <<< "$(git diff HEAD~1 HEAD --name-only --diff-filter=M -- src/data/blog/)"
+
+          ALL_POSTS=$(printf '%s\n%s' "$ADDED" "$PUBLISHED" | sed '/^[[:space:]]*$/d')
+
+          if [ -z "$ALL_POSTS" ]; then
             echo "No new posts in this push."
             exit 0
           fi
-          echo "New posts detected:"
-          echo "$NEW_POSTS"
+
+          echo "Posts to share:"
+          echo "$ALL_POSTS"
           while IFS= read -r post_file; do
             [ -z "$post_file" ] && continue
             node scripts/share-post.mjs "$post_file"
-          done <<< "$NEW_POSTS"
+          done <<< "$ALL_POSTS"
