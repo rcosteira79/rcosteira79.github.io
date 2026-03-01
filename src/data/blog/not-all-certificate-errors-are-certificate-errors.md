@@ -1,15 +1,11 @@
 ---
-title: Never Trust a Trust Anchor
+title: Not All Certificate Errors Are Certificate Errors
 description: A CertPathValidatorException that had nothing to do with certificates, and the missing HTTP header that caused it.
 pubDatetime: 2026-02-28T00:00:00Z
 author: Ricardo Costeira
 tags:
   - android
 draft: true
-# Optional fields:
-# modDatetime: 2026-02-28T00:00:00Z   — set when editing a published post
-# featured: true                       — shows in the featured section on the home page
-# socialPost: "Custom message for social sharing. Supports {title}, {description}, {url}."
 ---
 
 One of those bugs where the error message looks you in the eye and tells you to go f* yourself.
@@ -30,9 +26,9 @@ None of those were the problem. But I didn't know that yet, and the error messag
 
 I checked the network security config — everything looked fine. With a release very close and the error still unexplained, the team went with the fastest thing that worked: the backend added a fallback field to one of our API responses, an alternate image URL for the same image on a different domain that always loaded. Problem "solved." Except this was the kind of solution that eventually bites you in the rear: a workaround maintained across multiple teams, indefinitely, until everyone forgets why it's there and/or it becomes an issue in the future[^1] — in this case, with two sources of truth for the same data, it was a matter of time until someone forgot to update both fields when changing images.
 
-Some time after the release, I found the time to come back to it. This time I went deeper: checked every certificate in the chain — all valid, not expired, properly chained. Tried certificate pinning. Tried passing a custom OkHttp instance into Coil, since it creates its own by default and I wanted to rule out any quirk in how it was being initialised. Added extra logging. At one point I even spun up a brand new, empty Android project that did nothing but try to load the image — no existing configuration, no layers of abstraction, just Coil and a URL. Still nothing.
+Some time after the release, I found the time to come back to it. This time I went deeper: checked every certificate in the chain — all valid, not expired, properly chained. Tried certificate pinning. Tried passing a custom OkHttp instance into Coil, since it creates its own by default and I wanted to rule out any quirk in how it was being initialised. Added extra logging. At one point I even spun up a brand new, empty Android project (with and without `network_security_config.xml` properly configured) that did nothing but try to load the image — no existing configuration, no layers of abstraction, just Coil and a URL. Still nothing. And yes, I did try other URLs in this new app to make sure it worked. 
 
-The iOS and web parity made a certificate explanation hard to fully accept — if the chain were genuinely broken, it would have broken all platforms equally. So I kept at it.
+The iOS and web parity made a certificate explanation hard to fully accept — if the chain were genuinely broken, it would have broken all platforms equally. So I kept at it. There may or may not have been tears at this point. 
 
 ## The Glide Experiment
 
