@@ -23,8 +23,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // ---------------------------------------------------------------------------
 // Frontmatter parser
 // Handles simple single-line key: value pairs. Values may contain colons.
-// Note: socialPost must be a single-line value (quote it if it contains
-// special YAML characters like colons or leading/trailing spaces).
+// socialPost supports \n escape sequences for multi-line posts:
+//   socialPost: "Line one\n\nLine two\n\n{url}"
 // ---------------------------------------------------------------------------
 function parseFrontmatter(fileContent) {
   const match = fileContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
@@ -36,8 +36,8 @@ function parseFrontmatter(fileContent) {
     if (colonIdx === -1) continue;
     const key = line.slice(0, colonIdx).trim();
     const raw = line.slice(colonIdx + 1).trim();
-    // Strip surrounding quotes if present
-    result[key] = raw.replace(/^["'`]|["'`]$/g, "");
+    // Strip surrounding quotes then unescape \n sequences
+    result[key] = raw.replace(/^["'`]|["'`]$/g, "").replace(/\\n/g, "\n");
   }
   return result;
 }

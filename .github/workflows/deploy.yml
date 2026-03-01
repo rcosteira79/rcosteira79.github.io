@@ -64,7 +64,7 @@ jobs:
       - name: Share new posts to Buffer
         env:
           BUFFER_API_TOKEN: ${{ secrets.BUFFER_API_TOKEN }}
-          SITE_URL: https://rcosteira79.github.io
+          SITE_URL: https://ricardocosteira.dev
         run: |
           if ! git rev-parse HEAD~1 >/dev/null 2>&1; then
             echo "No previous commit found, skipping share step."

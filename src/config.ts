@@ -1,5 +1,5 @@
 export const SITE = {
-  website: "https://rcosteira79.github.io/",
+  website: "https://ricardocosteira.dev/",
   author: "Ricardo Costeira",
   profile: "https://github.com/rcosteira79",
   desc: "Android engineer writing about Kotlin, mobile development, and software craft.",
@@ -20,9 +20,7 @@ export const SITE = {
   dir: "ltr", // "rtl" | "auto"
   lang: "en", // html lang code. Set this empty and default will be "en"
   timezone: "Europe/Lisbon", // Default global timezone (IANA format) https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-  socialTemplate: `New post: {title}
+  socialTemplate: `Hey there! Just published a new article: "{title}"
 
-{description}
-
-{url}`,
+Take a peek at {url}`,
 } as const;
