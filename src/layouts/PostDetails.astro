@@ -28,6 +28,8 @@ const {
   author,
   description,
   ogImage: initOgImage,
+  ogImageAuthor,
+  ogImageAuthorUrl,
   canonicalURL,
   pubDatetime,
   modDatetime,
@@ -108,6 +110,43 @@ const nextPost =
       >
       <EditPost {hideEditPost} {post} class="max-sm:hidden" />
     </div>
+    {
+      initOgImage && ogImageUrl && (
+        <figure class="mt-6">
+          <img
+            src={ogImageUrl}
+            alt={title}
+            class="w-full rounded-lg object-cover max-h-[32rem]"
+          />
+          {ogImageAuthor && (
+            <figcaption class="mt-2 text-center text-xs text-muted-foreground">
+              Photo by{" "}
+              {ogImageAuthorUrl ? (
+                <a
+                  href={ogImageAuthorUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="underline underline-offset-2 hover:text-foreground"
+                >
+                  {ogImageAuthor}
+                </a>
+              ) : (
+                ogImageAuthor
+              )}{" "}
+              on{" "}
+              <a
+                href="https://unsplash.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="underline underline-offset-2 hover:text-foreground"
+              >
+                Unsplash
+              </a>
+            </figcaption>
+          )}
+        </figure>
+      )
+    }
     <article
       id="article"
       class="app-prose mt-8 w-full max-w-app prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"

@@ -1,12 +1,15 @@
 ---
-author: Ricardo Costeira
-pubDatetime: 2026-03-01T00:00:00Z
 title: Hello Again, World
+description: It's been years. But something is buzzing again.
+ogImage: ./hello-world/cover.jpg
+ogImageAuthor: Braden Collum
+ogImageAuthorUrl: https://unsplash.com/@bradencollum
+pubDatetime: 2026-03-01T00:00:00Z
+author: Ricardo Costeira
 featured: false
 draft: true
 tags:
   - meta
-description: It's been years. But something is buzzing again.
 socialPost: "After so many years, I decided to start writing (mostly) about Android on my personal blog again. You can read why on my first post: {url}\n\n(Spoiler: has to do with AI)"
 ---
 

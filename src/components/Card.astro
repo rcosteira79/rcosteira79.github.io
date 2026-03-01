@@ -10,10 +10,27 @@ type Props = {
 
 const { variant: Heading = "h2", id, data, filePath } = Astro.props;
 
-const { title, description, ...props } = data;
+const { title, description, ogImage, ...props } = data;
+
+const coverUrl = ogImage
+  ? typeof ogImage === "string"
+    ? ogImage
+    : ogImage.src
+  : undefined;
 ---
 
 <li class="my-6">
+  {
+    coverUrl && (
+      <a href={getPath(id, filePath)} class="block mb-3" tabindex="-1" aria-hidden="true">
+        <img
+          src={coverUrl}
+          alt={title}
+          class="w-full rounded-lg object-cover h-52"
+        />
+      </a>
+    )
+  }
   <a
     href={getPath(id, filePath)}
     class:list={[
