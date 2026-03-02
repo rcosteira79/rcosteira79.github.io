@@ -1,7 +1,7 @@
 ---
 title: Not All Certificate Errors Are Certificate Errors
 description: A CertPathValidatorException that had nothing to do with certificates, and the missing HTTP header that caused it.
-pubDatetime: 2026-02-28T00:00:00Z
+pubDatetime: 2026-03-05T00:00:00Z
 author: Ricardo Costeira
 ogImage: ./not-all-certificate-errors-are-certificate-errors/cover.jpg
 ogImageAuthor: Jametlene Reskp

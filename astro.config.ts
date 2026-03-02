@@ -14,6 +14,9 @@ import { SITE } from "./src/config";
 // https://astro.build/config
 export default defineConfig({
   site: SITE.website,
+  redirects: {
+    "/posts/hello-world": "/posts/2026/hello-world",
+  },
   integrations: [
     sitemap({
       filter: page => SITE.showArchives || !page.endsWith("/archives"),

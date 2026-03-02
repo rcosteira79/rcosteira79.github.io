@@ -9,10 +9,13 @@ Personal blog and portfolio at [rcosteira79.github.io](https://rcosteira79.githu
 ## Commands
 
 ```bash
-pnpm install       # Install dependencies
-pnpm dev           # Start dev server at http://localhost:4321
-pnpm build         # Build static site to dist/
-pnpm preview       # Preview the built site locally
+pnpm install        # Install dependencies
+pnpm dev            # Start dev server at http://localhost:4321
+pnpm build          # Type-check, build to dist/, and generate pagefind search index
+pnpm preview        # Preview the built site locally
+pnpm lint           # ESLint (run before pushing; CI enforces this)
+pnpm format:check   # Prettier check (run before pushing; CI enforces this)
+pnpm format         # Prettier auto-fix
 ```
 
 Node is managed via nvm. If commands fail, run `source ~/.nvm/nvm.sh` first (or add it to your shell profile).
@@ -25,19 +28,28 @@ Posts live in `src/data/blog/` as Markdown files. Frontmatter schema (from `src/
 ---
 author: Ricardo Costeira        # optional, defaults to SITE.author
 pubDatetime: 2026-02-26T00:00:00Z  # required, ISO datetime
-modDatetime: 2026-02-27T00:00:00Z  # optional, last modified
+modDatetime: 2026-02-27T00:00:00Z  # optional, set when editing a published post
 title: Post Title               # required
-featured: false                 # shows on homepage featured section
+featured: false                 # shows in Featured section on home page
 draft: false                    # true = excluded from listings/feeds
 tags:
   - android
 description: Short description  # required, used in listings and SEO
+# Optional:
+# ogImage: ./cover.png          # custom OG image (relative path or URL)
+# canonicalURL: https://...     # if republished from elsewhere
+# socialPost: "Custom share message. Supports {title}, {description}, {url}."
+# timezone: Europe/Lisbon       # overrides SITE.timezone for pubDatetime display
 ---
 
 Post body in Markdown...
 ```
 
 The slug is derived from the filename automatically — do not include a `slug` field.
+
+Files prefixed with `_` (e.g. `_template.md`) are excluded from the blog collection by the glob loader.
+
+**Home page filtering**: the index only shows featured posts and posts published within the last year. Older posts are accessible via `/posts/` and `/archives/`.
 
 ## Architecture
 
@@ -56,3 +68,5 @@ Nav links are hardcoded in `src/components/Header.astro`. To add a page to the n
 ## Deployment
 
 Pushing to `master` triggers GitHub Actions, which runs `pnpm build` and deploys `dist/` to GitHub Pages. Requires GitHub repo Settings → Pages → Source set to "GitHub Actions".
+
+After deploy, a `share` job automatically posts new articles to Buffer (`BUFFER_API_TOKEN` secret). It triggers when a `.md` file is newly added to `src/data/blog/`, or when an existing post has `draft: true` flipped to `draft: false` (or removed). The share message uses `SITE.socialTemplate` from `src/config.ts` unless the post overrides it with `socialPost` in frontmatter.
