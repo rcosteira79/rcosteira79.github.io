@@ -10,7 +10,7 @@ featured: false
 draft: true
 tags:
   - meta
-socialPost: "After so many years, I decided to start writing (mostly) about Android on my personal blog again. You can read why on my first post: {url}\n\n(Spoiler: has to do with AI)"
+socialPost: "After so many years, I decided to start writing (mostly) about Android on my personal blog again 🚀 You can read why on my first post: {url}\n\n(Spoiler: has to do with AI)"
 ---
 
 It's been a while.

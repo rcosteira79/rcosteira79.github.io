@@ -17,7 +17,7 @@ import { resolve, basename, dirname, join } from "node:path";
 const DRY_RUN = process.argv.includes("--dry-run");
 const SCHEDULE = process.argv.includes("--schedule");
 const BUFFER_API_TOKEN = process.env.BUFFER_API_TOKEN;
-const SITE_URL = (process.env.SITE_URL ?? "https://rcosteira79.github.io").replace(/\/$/, "");
+const SITE_URL = (process.env.SITE_URL ?? "https://ricardocosteira.dev").replace(/\/$/, "");
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ---------------------------------------------------------------------------
@@ -66,42 +66,73 @@ function interpolate(template, vars) {
 }
 
 // ---------------------------------------------------------------------------
-// Buffer API
-//
-// IMPORTANT: Buffer's public API is in beta. Verify these endpoints against
-// the current docs at https://buffer.com/developers before running.
-// The expected request shape is based on Buffer's published API design.
+// Buffer GraphQL API — https://developers.buffer.com
 // ---------------------------------------------------------------------------
-async function fetchBufferProfileIds(token) {
-  const res = await fetch("https://api.bufferapp.com/1/profiles.json", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) {
-    throw new Error(`Buffer /profiles failed (${res.status}): ${await res.text()}`);
-  }
-  const profiles = await res.json();
-  return profiles.map(p => p.id);
-}
+const BUFFER_API_URL = "https://api.buffer.com";
 
-async function postToBuffer(token, profileIds, text, schedule = false) {
-  const scheduledAt = String(Math.floor((Date.now() + 7 * 24 * 60 * 60 * 1000) / 1000));
-  const body = new URLSearchParams(
-    schedule ? { text, scheduled_at: scheduledAt } : { text, now: "true" }
-  );
-  profileIds.forEach(id => body.append("profile_ids[]", id));
-
-  const res = await fetch("https://api.bufferapp.com/1/updates/create.json", {
+async function bufferGraphQL(token, query, variables = {}) {
+  const res = await fetch(BUFFER_API_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Type": "application/json",
     },
-    body: body.toString(),
+    body: JSON.stringify({ query, variables }),
   });
   if (!res.ok) {
-    throw new Error(`Buffer create post failed (${res.status}): ${await res.text()}`);
+    throw new Error(`Buffer API failed (${res.status}): ${await res.text()}`);
   }
-  return res.json();
+  const json = await res.json();
+  if (json.errors?.length) {
+    throw new Error(`Buffer API error: ${json.errors.map(e => e.message).join(", ")}`);
+  }
+  return json.data;
+}
+
+async function fetchBufferChannelIds(token) {
+  const orgData = await bufferGraphQL(token, `
+    query { account { organizations { id } } }
+  `);
+  const orgId = orgData.account.organizations[0]?.id;
+  if (!orgId) throw new Error("No Buffer organization found.");
+
+  const channelData = await bufferGraphQL(token, `
+    query GetChannels($input: ChannelsInput!) {
+      channels(input: $input) { id name service }
+    }
+  `, { input: { organizationId: orgId } });
+
+  return channelData.channels.map(c => c.id);
+}
+
+async function postToBuffer(token, channelIds, text, schedule = false) {
+  const dueAt = schedule
+    ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    : undefined;
+
+  for (const channelId of channelIds) {
+    const data = await bufferGraphQL(token, `
+      mutation CreatePost($input: CreatePostInput!) {
+        createPost(input: $input) {
+          ... on PostActionSuccess { post { id } }
+          ... on MutationError { message }
+        }
+      }
+    `, {
+      input: {
+        channelId,
+        text,
+        schedulingType: "automatic",
+        mode: schedule ? "customScheduled" : "shareNow",
+        ...(dueAt && { dueAt }),
+      },
+    });
+
+    const result = data.createPost;
+    if (result.message) {
+      throw new Error(`Buffer rejected post for channel ${channelId}: ${result.message}`);
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -117,13 +148,13 @@ async function main() {
 
   const template = readSocialTemplate();
 
-  let profileIds = [];
+  let channelIds = [];
   if (!DRY_RUN) {
     if (!BUFFER_API_TOKEN) {
       throw new Error("BUFFER_API_TOKEN environment variable is not set.");
     }
-    profileIds = await fetchBufferProfileIds(BUFFER_API_TOKEN);
-    console.log(`Sharing to ${profileIds.length} Buffer profile(s).`);
+    channelIds = await fetchBufferChannelIds(BUFFER_API_TOKEN);
+    console.log(`Sharing to ${channelIds.length} Buffer channel(s).`);
   }
 
   for (const file of files) {
@@ -151,7 +182,7 @@ async function main() {
       console.log(`\n[DRY RUN] File: ${file}`);
       console.log(`Message:\n---\n${message}\n---`);
     } else {
-      await postToBuffer(BUFFER_API_TOKEN, profileIds, message, SCHEDULE);
+      await postToBuffer(BUFFER_API_TOKEN, channelIds, message, SCHEDULE);
       if (SCHEDULE) {
         console.log(`✓ Scheduled on Buffer (7 days out): "${fm.title}"`);
       } else {
