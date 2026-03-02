@@ -126,9 +126,9 @@ const nextPost =
                   href={ogImageAuthorUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="underline underline-offset-2 hover:text-foreground"
+                  class="hover:text-foreground"
                 >
-                  {ogImageAuthor}
+                  <span class="underline underline-offset-2">{ogImageAuthor}</span>
                 </a>
               ) : (
                 ogImageAuthor
@@ -138,9 +138,9 @@ const nextPost =
                 href="https://unsplash.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="underline underline-offset-2 hover:text-foreground"
+                class="hover:text-foreground"
               >
-                Unsplash
+                <span class="underline underline-offset-2">Unsplash</span>
               </a>
             </figcaption>
           )}
