@@ -2,8 +2,8 @@
 title: Hello Again, World
 description: It's been years. But something is buzzing again.
 ogImage: ./hello-world/cover.jpg
-ogImageAuthor: Braden Collum
-ogImageAuthorUrl: https://unsplash.com/@bradencollum
+ogImageAuthor: Tyler Lastovich
+ogImageAuthorUrl: https://unsplash.com/@lastly
 pubDatetime: 2026-03-01T00:00:00Z
 author: Ricardo Costeira
 featured: false
