@@ -166,6 +166,13 @@ async function main() {
       continue;
     }
 
+    // Skip posts older than 2 days — prevents accidentally sharing backdated or restored posts
+    const pubDate = fm.pubDatetime ? new Date(fm.pubDatetime) : null;
+    if (pubDate && Date.now() - pubDate.getTime() > 2 * 24 * 60 * 60 * 1000) {
+      console.log(`Skipping old post (published ${fm.pubDatetime}): ${file}`);
+      continue;
+    }
+
     const slug = basename(file, ".md")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
