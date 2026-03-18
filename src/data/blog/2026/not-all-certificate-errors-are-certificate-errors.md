@@ -8,7 +8,7 @@ ogImageAuthor: Jametlene Reskp
 ogImageAuthorUrl: https://unsplash.com/@reskp
 tags:
   - android
-draft: true
+draft: false
 socialPost: "Wrote a small blog post about a very annoying issue I encountered some time ago, related to image loading with Coil and a very nitpicky image domain 😄 read about it here 👉 {url}"
 ---
 
