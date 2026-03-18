@@ -1,7 +1,7 @@
 ---
 title: Not All Certificate Errors Are Certificate Errors
 description: A CertPathValidatorException that had nothing to do with certificates, and the missing HTTP header that caused it.
-pubDatetime: 2026-03-05T00:00:00Z
+pubDatetime: 2026-03-18T00:00:00Z
 author: Ricardo Costeira
 ogImage: ./not-all-certificate-errors-are-certificate-errors/cover.jpg
 ogImageAuthor: Jametlene Reskp
@@ -9,6 +9,7 @@ ogImageAuthorUrl: https://unsplash.com/@reskp
 tags:
   - android
 draft: true
+socialPost: "Wrote a small blog post about a very annoying issue I encountered some time ago, related to image loading with Coil and a very nitpicky image domain 😄 read about it here 👉 {url}"
 ---
 
 One of those bugs where the error message looks you in the eye and tells you to go f* yourself.
