@@ -16,6 +16,8 @@ export default defineConfig({
   site: SITE.website,
   redirects: {
     "/posts/hello-world": "/posts/2026/hello-world",
+    "/posts/not-all-certificate-errors-are-certificate-errors":
+      "/posts/2026/not-all-certificate-errors-are-certificate-errors",
   },
   integrations: [
     sitemap({
