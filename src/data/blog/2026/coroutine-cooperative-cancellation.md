@@ -87,3 +87,58 @@ viewModelScope.launch {
 Like `ensureActive()`, it throws on cancellation. Unlike `ensureActive()`, it's an actual suspension point, so it does real cooperative scheduling work. If you're on a shared dispatcher and the loop is heavy enough to starve other coroutines, `yield()` is the honest fix.
 
 The trade-off to be clear about: `isActive` leaves you in control of the cancellation path. `ensureActive()` and `yield()` both throw, so at the point of the throw, you can't distinguish cancellation from any other error without catching `CancellationException` specifically — which you generally shouldn't be catching anyway (more on that shortly). None of them is always the right answer. It depends on what the code around the loop actually needs to do when things stop.
+
+## The exception you should never catch
+
+`withTimeout` and `withTimeoutOrNull` are another common way to meet `CancellationException` — a timed-out call throws one too, so if you've already crossed paths with it through that route, what follows will look familiar. But the footgun lives a bit deeper.
+
+`CancellationException` is the carrier signal for coroutine cancellation. When a coroutine is cancelled, the runtime throws one at the next suspension point, and it propagates up the call stack from there. The whole machinery depends on that exception making it out unobstructed. If something catches it and doesn't rethrow it, the signal stops. The parent scope thinks cancellation completed cleanly. The coroutine thinks... nothing, actually, because it's carrying on as if nothing happened.
+
+The reason this is easy to miss: `CancellationException` is a subclass of `RuntimeException`. So a blanket `catch (e: Exception)` catches it, silently, alongside every other error you were actually trying to handle.
+
+```kotlin
+viewModelScope.launch {
+    try {
+        fetchData()
+    } catch (e: Exception) {
+        // looks reasonable. but if fetchData() was cancelled,
+        // CancellationException ends up here and gets swallowed.
+        handleError(e)
+    }
+}
+```
+
+No warning. No crash. The code just keeps running after the scope was supposed to have cancelled it.
+
+I did this. A suspend call inside a `try-catch` that caught `Exception`, a `CancellationException` walked in, and the coroutine kept executing work it had absolutely no business doing after the screen was already gone. The fix, once I understood what was happening, was embarrassingly straightforward. The time between "why is this still running" and "oh" was longer than I'd like to admit.
+
+There are two ways out of this.
+
+Option A: catch `CancellationException` explicitly and rethrow it before handling anything else:
+
+```kotlin
+viewModelScope.launch {
+    try {
+        fetchData()
+    } catch (e: CancellationException) {
+        throw e  // always rethrow cancellation
+    } catch (e: Exception) {
+        handleError(e)
+    }
+}
+```
+
+Option B: don't catch `Exception` at all — catch only the specific exceptions you actually expect:
+
+```kotlin
+viewModelScope.launch {
+    try {
+        fetchData()
+    } catch (e: IOException) {
+        // only catches what we actually care about
+        handleError(e)
+    }
+}
+```
+
+Option B tends to be cleaner, for the same reason narrow types are generally cleaner: it forces you to be honest about what can go wrong and what you're prepared to do about it. But it requires knowing what `fetchData()` throws, which isn't always obvious when the call goes several layers deep. Option A is the safety net when you need to catch broadly and can't easily narrow it down. Both are valid. Neither is a reason to feel clever.
