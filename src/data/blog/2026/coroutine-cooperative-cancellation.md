@@ -179,3 +179,60 @@ viewModelScope.launch {
 The surrounding coroutine is still cancelled — `NonCancellable` doesn't change that. It just opts the block out long enough for the cleanup to finish.
 
 The footgun, since we're being honest: `NonCancellable` should only appear in `finally` blocks for genuine cleanup. If you find yourself wrapping business logic in it — a network call, a state update, anything that isn't strictly "undo what I started" — you've opted that code out of structured concurrency entirely. Cancellation can't touch it. Timeouts can't touch it. If something goes wrong inside it, the parent scope has no leverage. Keep the block as small as possible, and make sure everything inside it actually needs to finish regardless of what the rest of the coroutine was doing when it was cancelled.
+
+## The hierarchy
+
+Every coroutine launched inside another inherits a parent-child relationship through their `Job`s. Cancel the parent, and the runtime cancels all children. That's the obvious direction. The less obvious one: when a child fails with a non-cancellation exception, the failure propagates *up* to the parent, which then cancels itself and all remaining siblings. Structured concurrency — predictable, leak-free by default, and occasionally surprising if you haven't thought it through.
+
+```kotlin
+viewModelScope.launch {  // parent
+    launch {  // child 1
+        delay(1_000)
+        throw RuntimeException("something went wrong")
+        // the exception travels up to the parent,
+        // which cancels the parent and child 2
+    }
+    launch {  // child 2
+        delay(5_000)
+        println("this never runs")  // cancelled before it gets here
+    }
+}
+```
+
+Both children started fine. Child 1 failed. Child 2 never gets to its `println`. The parent coroutine is gone too. This isn't a bug — it's the design. A failure in one part of a coordinated operation cancelling the whole thing is usually what you want. If you fetched user data and then the preferences fetch threw, do you really want to keep going with a half-initialised screen?
+
+Sometimes, though, the tasks genuinely aren't coordinated. Loading a feed and loading ads aren't part of the same logical operation — one failing doesn't make the other's result useless. That's where `SupervisorJob` comes in.
+
+A `SupervisorJob` changes the child-failure behaviour so a failing child doesn't cancel its siblings or the parent. It's usually passed to a `CoroutineScope` constructor directly:
+
+```kotlin
+val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+```
+
+In practice, you rarely need to wire this up by hand. The scoped builders are cleaner.
+
+`coroutineScope` gives you default structured concurrency behaviour — one child fails, the scope and all other children are cancelled:
+
+```kotlin
+// coroutineScope: standard propagation.
+// One child throws a real exception → the scope and siblings are cancelled.
+coroutineScope {
+    launch { loadFeed() }   // if this throws...
+    launch { loadAds() }    // ...this gets cancelled too
+}
+```
+
+`supervisorScope` makes children independent. A failing child doesn't take the others down:
+
+```kotlin
+// supervisorScope: failure isolation.
+// One child throws → siblings and the parent are unaffected.
+supervisorScope {
+    launch { loadFeed() }   // if this throws...
+    launch { loadAds() }    // ...this still runs
+}
+```
+
+`supervisorScope` is genuinely useful for parallel tasks that don't depend on each other. But it's worth being honest about the trade-off: using it opts you out of the safety net that structured concurrency provides. The failure still happened — it just won't propagate. You're responsible for handling it somewhere inside the failing child (typically with `CoroutineExceptionHandler` or a `try-catch` inside the `launch`), because if you don't, it gets swallowed silently and you're back to the debugging experience you were trying to avoid.
+
+The smell to watch for: reaching for `supervisorScope` because a child is throwing and you'd rather not deal with it cascading. That's not "the tasks are independent" — that's suppressing a failure signal. The propagation is a feature. If child 1 failing genuinely shouldn't affect child 2, use `supervisorScope`. If you're not sure, that uncertainty is probably worth sitting with before you reach for it.
