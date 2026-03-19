@@ -7,6 +7,7 @@ tags:
   - android
   - kotlin
 draft: true
+socialPost: "Wrote up everything I wish I'd known about coroutine cancellation before it bit me in production — cooperative cancellation, CancellationException footguns, NonCancellable cleanup, the works 🧵 {url}"
 ---
 
 Coroutine cancellation looks like it works. You call `viewModelScope.cancel()`, the user navigates away, the scope gets cleaned up. Things stop running. You never have to think about it — until you do, at which point the word "cooperative" starts to feel less like a feature description and more like a warning you missed.
@@ -90,8 +91,6 @@ The trade-off to be clear about: `isActive` leaves you in control of the cancell
 
 ## The exception you should never catch
 
-`withTimeout` and `withTimeoutOrNull` are another common way to meet `CancellationException` — a timed-out call throws one too, so if you've already crossed paths with it through that route, what follows will look familiar. But the footgun lives a bit deeper.
-
 `CancellationException` is the carrier signal for coroutine cancellation. When a coroutine is cancelled, the runtime throws one at the next suspension point, and it propagates up the call stack from there. The whole machinery depends on that exception making it out unobstructed. If something catches it and doesn't rethrow it, the signal stops. The parent scope thinks cancellation completed cleanly. The coroutine thinks... nothing, actually, because it's carrying on as if nothing happened.
 
 The reason this is easy to miss: `CancellationException` is a subclass of `RuntimeException`. So a blanket `catch (e: Exception)` catches it, silently, alongside every other error you were actually trying to handle.
@@ -143,7 +142,7 @@ viewModelScope.launch {
 
 Option B tends to be cleaner, for the same reason narrow types are generally cleaner: it forces you to be honest about what can go wrong and what you're prepared to do about it. But it requires knowing what `fetchData()` throws, which isn't always obvious when the call goes several layers deep. Option A is the safety net when you need to catch broadly and can't easily narrow it down. Both are valid. Neither is a reason to feel clever.
 
-## Finally, about `finally`
+## Cleanup and `finally`
 
 `finally` blocks still run when a coroutine is cancelled. The `CancellationException` propagates up the stack and `finally` does exactly what it's supposed to — this part works fine, no special handling required.
 
@@ -235,7 +234,7 @@ supervisorScope {
 
 `supervisorScope` is genuinely useful for parallel tasks that don't depend on each other. But it's worth being honest about the trade-off: using it opts you out of the safety net that structured concurrency provides. The failure still happened — it just won't propagate. You're responsible for handling it somewhere inside the failing child (typically with `CoroutineExceptionHandler` or a `try-catch` inside the `launch`), because if you don't, it gets swallowed silently and you're back to the debugging experience you were trying to avoid.
 
-The smell to watch for: reaching for `supervisorScope` because a child is throwing and you'd rather not deal with it cascading. That's not "the tasks are independent" — that's suppressing a failure signal. The propagation is a feature. If child 1 failing genuinely shouldn't affect child 2, use `supervisorScope`. If you're not sure, that uncertainty is probably worth sitting with before you reach for it.
+The smell to watch for: reaching for `supervisorScope` because a child is throwing and you'd rather not deal with it cascading. That's not "the tasks are independent" — that's suppressing a failure signal. The propagation is a feature. If child 1 failing genuinely shouldn't affect child 2, `supervisorScope` is the right tool. If you're not sure, that's probably a sign the tasks are more coupled than they look.
 
 ## What I Took Away
 
@@ -245,4 +244,4 @@ The smell to watch for: reaching for `supervisorScope` because a child is throwi
 
 **`supervisorScope` is a deliberate opt-out, not a cleanup tool.** Structured concurrency propagates failures for a reason — so that partial states don't silently linger, and so that one task failing doesn't leave its siblings running on stale assumptions. When `supervisorScope` is the right call, it's because the tasks genuinely don't share fate. When it's reached for because a child is throwing and the cascade is inconvenient, that's not failure isolation — that's a failure getting swallowed. The signal is still worth reading.
 
-**Most coroutine code cancels correctly because it happens to suspend a lot, not because it was written with cancellation in mind.** Network calls, Room queries, `delay` — they're all suspension points, so they're all cancellation checks, automatically, without any extra effort. That's the free lunch, and it covers the common case thoroughly enough that the mechanism can feel like magic. The problem is that "it's always worked" is a weak basis for "it will always work." A blocking loop here, a blanket catch there, a suspend call in a `finally` block — and suddenly the magic doesn't apply, and you're left wondering why things are still running after you told them to stop.
+**Most coroutine code cancels correctly because it happens to suspend a lot, not because it was written with cancellation in mind.** Network calls, Room queries, `delay` — they're all suspension points, so they're all cancellation checks, automatically, without any extra effort. That's the free lunch, and it covers the common case thoroughly enough that the mechanism can feel like magic. The problem is that "it's always worked" is a weak basis for "it will always work." A blocking loop here, a blanket catch there, a suspend call in a `finally` block — and suddenly you're left wondering why things are still running after you told them to stop.
