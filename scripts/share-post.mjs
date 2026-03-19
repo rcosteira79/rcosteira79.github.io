@@ -12,7 +12,7 @@
 
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { resolve, basename, dirname, join } from "node:path";
+import { resolve, basename, dirname, join, relative } from "node:path";
 
 const DRY_RUN = process.argv.includes("--dry-run");
 const SCHEDULE = process.argv.includes("--schedule");
@@ -173,9 +173,11 @@ async function main() {
       continue;
     }
 
-    const slug = basename(file, ".md")
+    const blogDir = join(__dirname, "../src/data/blog");
+    const slug = relative(blogDir, resolve(file))
+      .replace(/\.md$/, "")
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/[^a-z0-9/]+/g, "-")
       .replace(/^-|-$/g, "");
     const url = `${SITE_URL}/posts/${slug}/`;
     const messageTemplate = fm.socialPost ?? template;
