@@ -78,7 +78,7 @@ Explain the parent-child Job relationship: when a parent is cancelled, all child
 
 Hedge here: `SupervisorJob` is genuinely useful but also a footgun if reached for too early. It opts you out of structured concurrency's safety net. If tasks are genuinely independent, fine. If they're not and you're using `SupervisorJob` to silence failures, that's a smell.
 
-Briefly mention `supervisorScope` as the scoped alternative to `SupervisorJob` (preferred in most cases).
+Briefly contrast `coroutineScope` and `supervisorScope` as the scoped alternatives to `Job`/`SupervisorJob` — `coroutineScope` preserves the default structured concurrency failure behaviour (any child failure cancels the scope), `supervisorScope` gives each child independence. Scoped versions are preferred in most cases over constructing Jobs manually.
 
 ### What I Took Away
 
