@@ -95,6 +95,8 @@ The trade-off to be clear about: `isActive` leaves you in control of the cancell
 
 The reason this is easy to miss: `CancellationException` is a subclass of `RuntimeException`. So a blanket `catch (e: Exception)` catches it, silently, alongside every other error you were actually trying to handle.
 
+(Side note: `withTimeout` and `withTimeoutOrNull` throw a `CancellationException` when the deadline passes, so everything below applies there too.)
+
 ```kotlin
 viewModelScope.launch {
     try {
