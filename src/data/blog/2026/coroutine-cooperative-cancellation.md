@@ -142,3 +142,40 @@ viewModelScope.launch {
 ```
 
 Option B tends to be cleaner, for the same reason narrow types are generally cleaner: it forces you to be honest about what can go wrong and what you're prepared to do about it. But it requires knowing what `fetchData()` throws, which isn't always obvious when the call goes several layers deep. Option A is the safety net when you need to catch broadly and can't easily narrow it down. Both are valid. Neither is a reason to feel clever.
+
+## Finally, about `finally`
+
+`finally` blocks still run when a coroutine is cancelled. The `CancellationException` propagates up the stack and `finally` does exactly what it's supposed to — this part works fine, no special handling required.
+
+The trouble starts when the cleanup inside `finally` needs to suspend.
+
+```kotlin
+viewModelScope.launch {
+    try {
+        doWork()
+    } finally {
+        saveProgress()  // suspend fun — throws CancellationException immediately
+                        // because the coroutine is still cancelled. saveProgress never runs.
+    }
+}
+```
+
+The coroutine is cancelled. `finally` runs. `saveProgress()` is a suspend function, so the first thing it does is hit a suspension point — and at that suspension point, the coroutine's cancellation state is still active. `CancellationException` gets thrown again, right there, and `saveProgress()` exits before doing anything useful. The cleanup you put in `finally` to ensure work got saved quietly didn't.
+
+`withContext(NonCancellable)` is the escape hatch for this. It runs its block in a context that ignores cancellation entirely:
+
+```kotlin
+viewModelScope.launch {
+    try {
+        doWork()
+    } finally {
+        withContext(NonCancellable) {
+            saveProgress()  // now runs to completion even if the coroutine was cancelled
+        }
+    }
+}
+```
+
+The surrounding coroutine is still cancelled — `NonCancellable` doesn't change that. It just opts the block out long enough for the cleanup to finish.
+
+The footgun, since we're being honest: `NonCancellable` should only appear in `finally` blocks for genuine cleanup. If you find yourself wrapping business logic in it — a network call, a state update, anything that isn't strictly "undo what I started" — you've opted that code out of structured concurrency entirely. Cancellation can't touch it. Timeouts can't touch it. If something goes wrong inside it, the parent scope has no leverage. Keep the block as small as possible, and make sure everything inside it actually needs to finish regardless of what the rest of the coroutine was doing when it was cancelled.
