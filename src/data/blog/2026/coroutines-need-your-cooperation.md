@@ -26,7 +26,7 @@ Both cases look fine during development. Both tend to surface in production, und
 
 Where I live, there's a trampoline park called Jump City. You pay for your entrance in one-hour batches, and you go have fun jumping around and trying not to knee any little kids in the face. Every hour, there's a warning saying that the hour has passed. At that point, you have to _cooperatively_ leave the trampolines. If you're not actively listening to the warning, you'll just happily stay there until eventually someone comes asking you how long you've been there and for how long you actually paid (a friend told me, never happened to me).
 
-Coroutine cancellation works the same way. The parent scope doesn't reach in and stop your coroutine — it sets a cancellation flag. Whether anyone actually stops depends entirely on whether the code ever checks that flag. If it does — great, it sees the cancellation and unwinds cleanly. If it doesn't — if it's heads-down in a tight loop with no reason to check — the flag just sits there, being ignored, while the coroutine keeps running.
+Coroutine cancellation works the same way. The parent scope doesn't reach in and stop your coroutine: Instead, it sets a cancellation flag. Whether anyone actually stops depends entirely on whether the code ever checks that flag. If it does, great, it sees the cancellation and unwinds cleanly. If it doesn't, the flag just sits there, being ignored, while the coroutine keeps running.
 
 The mechanism is that cancellation throws a `CancellationException` at the next suspension point. Every `suspend` call is a potential interruption site — `delay`, network calls, `withContext`, all of them. When the coroutine reaches one of those points and cancellation has been requested, the exception is thrown, the coroutine unwinds, and that's that. If there's no suspension point — a tight CPU loop, say, or a blocking call dressed up in a coroutine — the exception has nowhere to land, so cancellation just waits, politely, until the code is done doing whatever it's doing.
 
@@ -101,7 +101,7 @@ The trade-off to be clear about: `isActive` leaves you in control of the cancell
 
 `CancellationException` is the carrier signal for coroutine cancellation. When a coroutine is cancelled, the runtime throws one at the next suspension point, and it propagates up the call stack from there. The whole machinery depends on that exception making it out unobstructed. If something catches it and doesn't rethrow it, the signal stops. The parent scope thinks cancellation completed cleanly. The coroutine thinks... nothing, actually, because it's carrying on as if nothing happened.
 
-The reason this is easy to miss: `CancellationException` is a subclass of `RuntimeException`. So a blanket `catch (e: Exception)` catches it, silently, alongside every other error you were actually trying to handle.
+The reason this is easy to miss: `CancellationException` is a subclass of `IllegalStateException`. So a blanket `catch (e: Exception)` catches it, silently, alongside every other error you were actually trying to handle.
 
 (Side note: `withTimeout` and `withTimeoutOrNull` throw a `CancellationException` when the deadline passes, so everything below applies there too.)
 
