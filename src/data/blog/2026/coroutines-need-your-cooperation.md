@@ -28,7 +28,7 @@ Where I live, there's a trampoline park called Jump City. You pay for your entra
 
 Coroutine cancellation works the same way. The parent scope doesn't reach in and stop your coroutine. Instead, it sets a cancellation flag[^1]: whether anyone actually stops depends entirely on whether the code ever checks that flag. If it does, great, it sees the cancellation and unwinds cleanly. If it doesn't, the flag just sits there, being ignored, while the coroutine keeps running.
 
-The mechanism is that cancellation throws a `CancellationException` at the next suspension point. Every `suspend` call is a potential interruption site — `delay`, network calls, `withContext`, all of them. When the coroutine reaches one of those points and cancellation has been requested, the exception is thrown, the coroutine unwinds, and that's that. If there's no suspension point — a tight CPU loop, say, or a blocking call dressed up in a coroutine — the exception has nowhere to land, so cancellation just waits, politely, until the code is done doing whatever it's doing.
+In practice, this check happens by throwing a `CancellationException` at the next suspension point. Every `suspend` call is a potential interruption site — `delay`, network calls, `withContext`, all of them. When the coroutine reaches one of those points and cancellation has been requested, the exception is thrown, the coroutine unwinds, and that's that. If there's no suspension point — a tight CPU loop, say, or a blocking call dressed up in a coroutine — the exception has nowhere to land, so cancellation just waits, politely, until the code is done doing whatever it's doing.
 
 Most code cooperates without you thinking about it, because most code suspends. The interesting cases are the ones that don't.
 
