@@ -24,19 +24,17 @@ Both cases look fine during development. Both tend to surface in production, und
 
 ## What "cooperative" actually means
 
-Where I live, there's a trampoline park called Jump City. You pay for your entrance in one-hour batches, and you go have fun jumping around and trying not to knee any little kids in the face. Every hour, there's a warning saying that the hour has passed. At that point, you have to _cooperatively_ leave the trampolines. If you're not actively listening to the warning, you'll just happily stay there until eventually someone comes asking you how long you've been there and for how long you actually paid (a friend told me, never happened to me).
+Where I live, there's a trampoline park called Jump City. You pay for your entrance in one-hour batches, and you go have fun jumping around and trying not to knee any little kids in the face. Every hour, there's a warning saying that an hour has passed. At that point, you have to _cooperatively_ (hah) leave the trampolines. If you're not actively listening to the warning, you'll just happily stay there until eventually someone comes and asks you how long you've been there and for how long you actually paid (a friend told me, never happened to me).
 
-Coroutine cancellation works the same way. The parent scope doesn't reach in and stop your coroutine. Instead, it sets a cancellation flag[^1]: whether anyone actually stops depends entirely on whether the code ever checks that flag. If it does, great, it sees the cancellation and unwinds cleanly. If it doesn't, the flag just sits there, being ignored, while the coroutine keeps running.
+Coroutine cancellation works the same way. The parent scope doesn't reach in and stop your coroutine. Instead, it sets a cancellation flag[^1]: whether anyone actually stops depends entirely on their code checking that flag. If it does, great, it sees the cancellation and unwinds cleanly. If it doesn't, the flag just sits there, ignored, while the coroutine keeps running.
 
-In practice, this check triggers a `CancellationException` at the next suspension point. Every `suspend` call is a potential interruption site — `delay`, `withContext`, and any suspending API from libraries like Retrofit or Room, which handle cancellation for you under the hood. When the coroutine reaches one of those points and cancellation has been requested, the exception is thrown, the coroutine unwinds, and that's that. If there's no suspension point — a tight CPU loop, say, or a blocking call dressed up in a coroutine — the exception has nowhere to land, so cancellation just waits, politely, until the code is done doing whatever it's doing and it reaches the next suspension point, which hopefully exists.
+In practice, this check triggers a `CancellationException` at the next suspension point. Every `suspend fun` from the API — `withContext`, `delay`, and all their friends – is a potential interruption site, as well as any suspending calls from libraries like Retrofit or Room, which handle cancellation for you under the hood. When the coroutine reaches one of those points and cancellation has been requested, the exception is thrown, the coroutine cleans up, and that's that. If there's no suspension point, which can happen if there's an expensive loop that doesn't check for cancellation on each iteration, for instance, the exception has nowhere to land, so cancellation just waits, politely, until the code is done doing whatever it's doing and it reaches the next suspension point, which hopefully exists.
 
-## The free lunch
+## Most code cooperates effortlessly
 
-Every `suspend` function call is a cancellation checkpoint. `delay()`, `withContext()`, `await()`, a Retrofit call, a Room query — all of them. The coroutine checks its cancellation state at each one automatically, no extra work on your part. If cancellation was requested between two suspension points, the next `suspend` call is where it lands.
+If your coroutine code is doing I/O, hitting the network, or querying a database through suspending APIs, you're most likely already cooperating. As already mentioned, every one of those calls is a suspension point, and every suspension point is a cancellation check. You didn't opt in or write any extra code. It just works, because the code happens to suspend often enough that cancellation always has somewhere to land. This is why cancellation can feel like a non problem for so long.
 
-That covers most Android coroutine code. If you're doing I/O, hitting the network, or querying a database through suspending APIs, you're already cooperating. The problem is the code that never suspends — and that's more common than it sounds.
-
-## When the free lunch ends
+## When it stops cooperating
 
 CPU-bound work is the obvious case. A loop that processes a large list, crunches numbers, or walks a data structure doesn't suspend — it just runs. If the coroutine gets cancelled while it's in there, the cancellation signal arrives and then waits politely at the door while the loop finishes whatever it was doing.
 
