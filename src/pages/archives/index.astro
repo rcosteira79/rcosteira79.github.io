@@ -13,7 +13,8 @@ if (!SITE.showArchives) {
   return Astro.redirect("/404");
 }
 
-const posts = await getCollection("blog", ({ data }) => !data.draft);
+const showDrafts = !!import.meta.env.SHOW_DRAFTS;
+const posts = await getCollection("blog", ({ data }) => showDrafts || !data.draft);
 
 const months = [
   "January",
