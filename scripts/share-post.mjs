@@ -2,9 +2,10 @@
 // scripts/share-post.mjs
 //
 // Usage:
-//   node scripts/share-post.mjs <file1.md> [file2.md] ...
+//   node scripts/share-post.mjs <file1.md> [file2.md] ...   (adds to Buffer queue)
+//   node scripts/share-post.mjs --now <file1.md> ...         (publishes immediately)
+//   node scripts/share-post.mjs --schedule <file1.md> ...    (schedules 7 days out, for testing)
 //   node scripts/share-post.mjs --dry-run <file1.md> ...
-//   node scripts/share-post.mjs --schedule <file1.md> ...   (schedules 7 days out, for testing)
 //
 // Environment variables:
 //   BUFFER_API_TOKEN  — required (unless --dry-run)
@@ -15,6 +16,7 @@ import { fileURLToPath } from "node:url";
 import { resolve, basename, dirname, join, relative } from "node:path";
 
 const DRY_RUN = process.argv.includes("--dry-run");
+const SHARE_NOW = process.argv.includes("--now");
 const SCHEDULE = process.argv.includes("--schedule");
 const BUFFER_API_TOKEN = process.env.BUFFER_API_TOKEN;
 const SITE_URL = (process.env.SITE_URL ?? "https://ricardocosteira.dev").replace(/\/$/, "");
@@ -105,10 +107,16 @@ async function fetchBufferChannelIds(token) {
   return channelData.channels.map(c => c.id);
 }
 
-async function postToBuffer(token, channelIds, text, schedule = false) {
-  const dueAt = schedule
-    ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-    : undefined;
+async function postToBuffer(token, channelIds, text, { now = false, schedule = false } = {}) {
+  let mode = "addToQueue";
+  let dueAt;
+
+  if (now) {
+    mode = "shareNow";
+  } else if (schedule) {
+    mode = "customScheduled";
+    dueAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  }
 
   for (const channelId of channelIds) {
     const data = await bufferGraphQL(token, `
@@ -123,7 +131,7 @@ async function postToBuffer(token, channelIds, text, schedule = false) {
         channelId,
         text,
         schedulingType: "automatic",
-        mode: schedule ? "customScheduled" : "shareNow",
+        mode,
         ...(dueAt && { dueAt }),
       },
     });
@@ -191,11 +199,13 @@ async function main() {
       console.log(`\n[DRY RUN] File: ${file}`);
       console.log(`Message:\n---\n${message}\n---`);
     } else {
-      await postToBuffer(BUFFER_API_TOKEN, channelIds, message, SCHEDULE);
-      if (SCHEDULE) {
+      await postToBuffer(BUFFER_API_TOKEN, channelIds, message, { now: SHARE_NOW, schedule: SCHEDULE });
+      if (SHARE_NOW) {
+        console.log(`✓ Published immediately to Buffer: "${fm.title}"`);
+      } else if (SCHEDULE) {
         console.log(`✓ Scheduled on Buffer (7 days out): "${fm.title}"`);
       } else {
-        console.log(`✓ Posted to Buffer: "${fm.title}"`);
+        console.log(`✓ Added to Buffer queue: "${fm.title}"`);
       }
     }
   }
