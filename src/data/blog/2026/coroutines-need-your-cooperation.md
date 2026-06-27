@@ -12,12 +12,12 @@ tags:
 draft: true
 socialPost: "Been seeing a lot of coroutine cancellation issues and misconceptions in the wild, so I wrote up everything I wish I'd known about coroutine cancellation before it bit me in production. Check it out at {url}"
 ---
- 
-Coroutine cancellation is great. You launch your coroutine on your `ViewModel`, have it do its work, the user navigates away, `viewModelScope.cancel()` gets called, the scope gets cleaned up, things stop running, resources are freed. Since suspend functions yield at cancellation checkpoints automatically, the code does the right thing without you asking. Usually. The problems start when – yes, _when_, not _if_ – you stray away from the happy path. These problems usually stem from either one of these factors, or both: 
 
- - Not all code suspends.
- - Not all `catch` blocks are as innocent as they look. 
- 
+Coroutine cancellation is great. You launch your coroutine on your `ViewModel`, have it do its work, the user navigates away, `viewModelScope.cancel()` gets called, the scope gets cleaned up, things stop running, resources are freed. Since suspend functions yield at cancellation checkpoints automatically, the code does the right thing without you asking. Usually. The problems start when – yes, _when_, not _if_ – you stray away from the happy path. These problems usually stem from either one of these factors, or both:
+
+- Not all code suspends.
+- Not all `catch` blocks are as innocent as they look.
+
 For instance, a CPU-bound loop with no suspension points will keep grinding away after the coroutine was supposed to be cancelled — the cancellation signal arrived, but your expensive loop couldn't care less about it. A `try-catch(e: Exception)` that you skillfully craft to handle any exceptions your code might spit out, will also swallow `CancellationException` unless you're explicit about it not doing it, quietly breaking the whole cancellation chain and leaving parent scopes waiting for a coroutine that looked the `CancellationException` in the eye and said "How about no?".
 
 Both cases look fine during development. Both tend to surface in production, under load, in the form of leaks or hangs that are annoying to reproduce. Both come down to the same misunderstanding: cancellation in Kotlin coroutines is a request, not a command, and it only works if the code is written to honor it.
@@ -32,7 +32,9 @@ In practice, this check triggers a `CancellationException` at the next suspensio
 
 ## Most code cooperates effortlessly
 
-If your coroutine code is doing I/O, hitting the network, or querying a database through suspending APIs, you're most likely already cooperating. As already mentioned, every one of those calls is a suspension point, and every suspension point is a cancellation check. You didn't opt in or write any extra code. It just works, because the code happens to suspend often enough that cancellation always has somewhere to land. This is why cancellation can feel like a non problem for so long.
+If your coroutine code is doing I/O, hitting the network, or querying a database through suspending APIs, you're most likely already cooperating. As already mentioned, every one of those calls is a suspension point, and every suspension point is a cancellation check. You didn't opt in or write any extra code. It just works, because the code happens to suspend often enough that cancellation always has somewhere to land.
+
+A lot, if not most of Android code follows this pattern: Coroutine launches from the `ViewModel`, jumps through a few boundary hoops until it reaches one or more data sources, and circles back. Through all of that, code probably hits at least one `withContext`, maybe a Room or a Retrofit call... This is why cancellation only becomes a problem when you stray away from the common path.
 
 ## When it stops cooperating
 
@@ -242,14 +244,82 @@ supervisorScope {
 
 The smell to watch for: reaching for `supervisorScope` because a child is throwing and you'd rather not deal with it cascading. That's not "the tasks are independent" — that's suppressing a failure signal. The propagation is a feature. If child 1 failing genuinely shouldn't affect child 2, `supervisorScope` is the right tool. If you're not sure, that's probably a sign the tasks are more coupled than they look.
 
+## The `launch` that escapes
+
+Here's a pattern you've almost certainly written: search-as-you-type. The user types, you debounce so you're not hammering the network on every keystroke, and you kick off a search when they pause.
+
+```kotlin
+private fun observeSearchQuery() {
+    viewModelScope.launch {
+        uiState
+            .map { it.searchQuery.trim() }
+            .distinctUntilChanged()
+            .debounce(SEARCH_DEBOUNCE_MILLIS)
+            .collectLatest { query ->
+                loadRepositories(query)  // surely the previous search gets cancelled here?
+            }
+    }
+}
+```
+
+`collectLatest` is the right instinct. Its whole job is to cancel the previous block when a new value arrives — so when the user types another letter, the in-flight search for the old query gets thrown away and replaced. Exactly what search-as-you-type wants.
+
+Except it doesn't, if `loadRepositories` looks like this:
+
+```kotlin
+private fun loadRepositories(query: String) {
+    viewModelScope.launch {              // <-- here's the problem
+        val repos = searchRepos(query)
+        _uiState.update { it.copy(repositories = repos) }
+    }
+}
+```
+
+The search doesn't run inside the `collectLatest` block. The block calls `loadRepositories`, which fires off a *separate* coroutine on `viewModelScope` and returns immediately. As far as `collectLatest` is concerned, the block did next to nothing and finished — so there's nothing left running for it to cancel.
+
+So every settled query starts another `viewModelScope.launch`, and the previous one — if it's still in flight — never gets cancelled.[^2] On a slow connection, the request for "kotl" can easily still be running when the request for "kotlin" goes out. Now they're both racing to write to `_uiState`, and whichever finishes last wins, regardless of which one matches what's actually in the search box. You search for "kotlin", catch a glimpse of results for "kotl", and have no idea why.
+
+What makes this hard to spot is that the call site lies. `loadRepositories(query)` reads like ordinary work happening inside the collector, so you'd assume it's a child of the coroutine running `collectLatest` and dies with it. But the `viewModelScope.launch` buried inside attaches the work to `viewModelScope` instead — making it a *sibling* of the collector, not a child. Cancellation only flows downward, parent to child. `collectLatest` can cancel its own children all it likes; this coroutine isn't one of them.
+
+This is the hierarchy from the last section, quietly subverted. Structured concurrency works because the Job tree mirrors the shape of your code — right up until a function reaches into some other scope and launches there, at which point the tree and the code stop agreeing.
+
+The fix is to not launch a second time. Make it a suspend function so the work runs directly inside the collector, where it actually is a child:
+
+```kotlin
+private fun observeSearchQuery() {
+    viewModelScope.launch {
+        uiState
+            .map { it.searchQuery.trim() }
+            .distinctUntilChanged()
+            .debounce(SEARCH_DEBOUNCE_MILLIS)
+            .collectLatest { query ->
+                loadRepositories(query)  // now actually runs here — and is cancellable
+            }
+    }
+}
+
+private suspend fun loadRepositories(query: String) {   // suspend, no inner launch
+    val repos = searchRepos(query)
+    _uiState.update { it.copy(repositories = repos) }
+}
+```
+
+Now the search runs as part of the `collectLatest` block. Next query in, `collectLatest` cancels the block, the cancellation reaches the suspending `searchRepos` call, and the stale search actually stops. The work is back inside the tree, where the cancellation signal can find it.
+
+The smell to watch for: a plain, non-`suspend` function you call from inside a coroutine and quietly expect to be cancellable. If it isn't `suspend`, it isn't doing its work in your coroutine — it's either blocking, or it launched the real work somewhere else. Both deserve a second look.
+
 ## What I Took Away
 
 **Cancellation is a request, and a coroutine that never suspends will never receive it.** The machinery doesn't push the signal in — it makes it available at suspension points, and the code has to reach one for anything to happen. A tight loop with no `delay`, no `yield`, no `withContext`, nothing — that loop will run to completion regardless of what the scope does. The gap isn't a bug in the runtime; it's in the assumption that "I cancelled the scope" and "the work stopped" are the same thing.
 
-**Catching `Exception` in a coroutine will eventually eat a `CancellationException`, and you won't notice until something is running that shouldn't be.** `CancellationException` is a `RuntimeException`. A blanket `catch` doesn't discriminate. I've written exactly that pattern — a suspend call inside a `try-catch(e: Exception)`, a `CancellationException` walked in, and the coroutine kept doing work on behalf of a screen that had already left. The fix was a two-line rethrow. The diagnosis took considerably longer. Catch specifically, or at minimum rethrow cancellation before handling anything else.
+**Catching `Exception` in a coroutine will eventually eat a `CancellationException`, and you won't notice until something is running that shouldn't be.** `CancellationException` is an `IllegalStateException`. A blanket `catch` doesn't discriminate. I've written exactly that pattern — a suspend call inside a `try-catch(e: Exception)`, a `CancellationException` walked in, and the coroutine kept doing work on behalf of a screen that had already left. The fix was a two-line rethrow. The diagnosis took considerably longer. Catch specifically, or at minimum rethrow cancellation before handling anything else.
 
 **`supervisorScope` is a deliberate opt-out, not a cleanup tool.** Structured concurrency propagates failures for a reason — so that partial states don't silently linger, and so that one task failing doesn't leave its siblings running on stale assumptions. When `supervisorScope` is the right call, it's because the tasks genuinely don't share fate. When it's reached for because a child is throwing and the cascade is inconvenient, that's not failure isolation — that's a failure getting swallowed. The signal is still worth reading.
+
+**A function that launches its own coroutine isn't doing its work inside yours, no matter how the call site reads.** Cancellation travels down the Job tree, and the tree only mirrors your code until something reaches into another scope to start work. The search-as-you-type bug is the tell: `collectLatest` sitting right there, cancelling its block on every keystroke exactly as advertised, while the stale network calls sail on — because they were launched a level up, on `viewModelScope`, out of reach of the collector trying to cancel them. If you need the coroutine you're in to cancel some work, that work has to run in it. A `suspend` function does. A function that calls `launch` for you does not.
 
 **Most coroutine code cancels correctly because it happens to suspend a lot, not because it was written with cancellation in mind.** Network calls, Room queries, `delay` — they're all suspension points, so they're all cancellation checks, automatically, without any extra effort. That's the free lunch, and it covers the common case thoroughly enough that the mechanism can feel like magic. The problem is that "it's always worked" is a weak basis for "it will always work." A blocking loop here, a blanket catch there, a suspend call in a `finally` block — and suddenly you're left wondering why things are still running after you told them to stop.
 
 [^1]: Internally it's a bit more complex than a simple flag, but no need to dig that deep here.
+
+[^2]: I came across this one in the wild with a plain `collect` rather than `collectLatest` — same outcome, arguably worse, since `collect` doesn't even pretend it's going to cancel the previous search. `collectLatest` at least looks like it should work, which is what makes it the more interesting version to show.
