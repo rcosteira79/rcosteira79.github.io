@@ -22,11 +22,16 @@ const coverUrl = ogImage
 <li class="my-6">
   {
     coverUrl && (
-      <a href={getPath(id, filePath)} class="block mb-3" tabindex="-1" aria-hidden="true">
+      <a
+        href={getPath(id, filePath)}
+        class="mb-3 block"
+        tabindex="-1"
+        aria-hidden="true"
+      >
         <img
           src={coverUrl}
           alt={title}
-          class="w-full rounded-lg object-cover h-52"
+          class="h-52 w-full rounded-lg object-cover"
         />
       </a>
     )

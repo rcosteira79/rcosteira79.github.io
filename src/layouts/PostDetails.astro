@@ -123,10 +123,10 @@ const nextPost =
           <img
             src={ogImageUrl}
             alt={title}
-            class="w-full rounded-lg object-cover max-h-[32rem]"
+            class="max-h-[32rem] w-full rounded-lg object-cover"
           />
           {ogImageAuthor && (
-            <figcaption class="mt-2 text-center text-xs text-muted-foreground">
+            <figcaption class="text-muted-foreground mt-2 text-center text-xs">
               Photo by{" "}
               {ogImageAuthorUrl ? (
                 <a
@@ -135,7 +135,9 @@ const nextPost =
                   rel="noopener noreferrer"
                   class="hover:text-foreground"
                 >
-                  <span class="underline underline-offset-2">{ogImageAuthor}</span>
+                  <span class="underline underline-offset-2">
+                    {ogImageAuthor}
+                  </span>
                 </a>
               ) : (
                 ogImageAuthor
