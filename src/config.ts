@@ -4,7 +4,9 @@ export const SITE = {
   profile: "https://github.com/rcosteira79",
   desc: "Android engineer writing about Kotlin, mobile development, and software craft.",
   title: "Ricardo Costeira",
-  ogImage: "astropaper-og.jpg",
+  // Empty on purpose: pages fall back to the generated card at /og.png.
+  // Point this at a file in public/ only if you want a fixed image instead.
+  ogImage: "",
   lightAndDarkMode: true,
   postPerIndex: 10,
   postPerPage: 10,

@@ -11,6 +11,8 @@ type Props = {
   profile?: string;
   description?: string;
   ogImage?: string;
+  ogImageWidth?: number;
+  ogImageHeight?: number;
   canonicalURL?: string;
   pubDatetime?: Date;
   modDatetime?: Date | null;
@@ -23,6 +25,9 @@ const {
   profile = SITE.profile,
   description = SITE.desc,
   ogImage = SITE.ogImage ? `/${SITE.ogImage}` : "/og.png",
+  // Defaults describe the generated card served from /og.png
+  ogImageWidth = SITE.ogImage ? undefined : 1200,
+  ogImageHeight = SITE.ogImage ? undefined : 630,
   canonicalURL = new URL(Astro.url.pathname, Astro.url),
   pubDatetime,
   modDatetime,
@@ -75,10 +80,27 @@ const structuredData = {
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={pubDatetime ? "article" : "website"} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:image" content={socialImageURL} />
+    {
+      ogImageWidth && ogImageHeight && (
+        <>
+          <meta property="og:image:width" content={String(ogImageWidth)} />
+          <meta property="og:image:height" content={String(ogImageHeight)} />
+        </>
+      )
+    }
+    <meta property="og:image:alt" content={title} />
+    <meta property="og:locale" content={SITE.lang || "en"} />
+    {
+      // Skip on the home page, where it would just repeat og:title
+      title !== SITE.title && (
+        <meta property="og:site_name" content={SITE.title} />
+      )
+    }
 
     <!-- Article Published/Modified time -->
     {
@@ -104,6 +126,7 @@ const structuredData = {
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={socialImageURL} />
+    <meta property="twitter:image:alt" content={title} />
 
     <!-- Google JSON-LD Structured data -->
     <script
@@ -121,7 +144,17 @@ const structuredData = {
       href={new URL("rss.xml", Astro.site)}
     />
 
-    <meta name="theme-color" content="" />
+    <!-- Matches the --background values in src/styles/global.css -->
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="#fdfdfd"
+    />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#212737"
+    />
 
     {
       // If PUBLIC_GOOGLE_SITE_VERIFICATION is set in the environment variable,

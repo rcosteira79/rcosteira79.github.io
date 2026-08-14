@@ -34,16 +34,17 @@ async function loadGoogleFonts(
 ): Promise<
   Array<{ name: string; data: ArrayBuffer; weight: number; style: string }>
 > {
+  // Same typeface the site itself uses (see astro.config.ts).
   const fontsConfig = [
     {
-      name: "IBM Plex Mono",
-      font: "IBM+Plex+Mono",
+      name: "Google Sans Code",
+      font: "Google+Sans+Code",
       weight: 400,
       style: "normal",
     },
     {
-      name: "IBM Plex Mono",
-      font: "IBM+Plex+Mono",
+      name: "Google Sans Code",
+      font: "Google+Sans+Code",
       weight: 700,
       style: "bold",
     },

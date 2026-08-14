@@ -41,17 +41,22 @@ const {
 const { Content } = await render(post);
 
 let ogImageUrl: string | undefined;
+// Only known for local assets and for the generated card; remote images
+// stay undefined so we don't advertise dimensions we can't verify.
+let ogImageSize: { width: number; height: number } | undefined;
 
 // Determine OG image source
 if (typeof initOgImage === "string") {
   ogImageUrl = initOgImage; // Remote OG image (absolute URL)
 } else if (initOgImage?.src) {
   ogImageUrl = initOgImage.src; // Local asset
+  ogImageSize = { width: initOgImage.width, height: initOgImage.height };
 }
 
 // Use dynamic OG image if enabled and no remote|local ogImage
 if (!ogImageUrl && SITE.dynamicOgImage) {
   ogImageUrl = `${getPath(post.id, post.filePath)}/index.png`;
+  ogImageSize = { width: 1200, height: 630 };
 }
 
 // Resolve OG image URL (or fallback to SITE.ogImage / default `og.png`)
@@ -67,6 +72,8 @@ const layoutProps = {
   modDatetime,
   canonicalURL,
   ogImage,
+  ogImageWidth: ogImage ? ogImageSize?.width : undefined,
+  ogImageHeight: ogImage ? ogImageSize?.height : undefined,
   scrollSmooth: true,
 };
 
