@@ -14,5 +14,7 @@ export default [
     },
   },
   { rules: { "no-console": "error" } },
+  // CLI scripts report progress on stdout — that's their job, not a smell.
+  { files: ["scripts/**"], rules: { "no-console": "off" } },
   { ignores: ["dist/**", ".astro", "public/pagefind/**"] },
 ];

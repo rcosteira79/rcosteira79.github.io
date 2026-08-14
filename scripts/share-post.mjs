@@ -13,7 +13,7 @@
 
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { resolve, basename, dirname, join, relative } from "node:path";
+import { resolve, dirname, join, relative } from "node:path";
 
 const DRY_RUN = process.argv.includes("--dry-run");
 const SHARE_NOW = process.argv.includes("--now");
