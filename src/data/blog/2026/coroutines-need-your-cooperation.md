@@ -189,7 +189,7 @@ The footgun, since we're being honest: `NonCancellable` should only appear in `f
 
 ## The hierarchy
 
-Every coroutine launched inside another inherits a parent-child relationship through their `Job`s. Cancel the parent, and the runtime cancels all children. That's the obvious direction. The less obvious one: when a child fails with a non-cancellation exception, the failure propagates *up* to the parent, which then cancels itself and all remaining siblings. Structured concurrency — predictable, leak-free by default, and occasionally surprising if you haven't thought it through.
+Every coroutine launched inside another inherits a parent-child relationship through their `Job`s. Cancel the parent, and the runtime cancels all children. That's the obvious direction. The less obvious one: when a child fails with a non-cancellation exception, the failure propagates _up_ to the parent, which then cancels itself and all remaining siblings. Structured concurrency — predictable, leak-free by default, and occasionally surprising if you haven't thought it through.
 
 ```kotlin
 viewModelScope.launch {  // parent
@@ -275,11 +275,11 @@ private fun loadRepositories(query: String) {
 }
 ```
 
-The search doesn't run inside the `collectLatest` block. The block calls `loadRepositories`, which fires off a *separate* coroutine on `viewModelScope` and returns immediately. As far as `collectLatest` is concerned, the block did next to nothing and finished — so there's nothing left running for it to cancel.
+The search doesn't run inside the `collectLatest` block. The block calls `loadRepositories`, which fires off a _separate_ coroutine on `viewModelScope` and returns immediately. As far as `collectLatest` is concerned, the block did next to nothing and finished — so there's nothing left running for it to cancel.
 
 So every settled query starts another `viewModelScope.launch`, and the previous one — if it's still in flight — never gets cancelled.[^2] On a slow connection, the request for "kotl" can easily still be running when the request for "kotlin" goes out. Now they're both racing to write to `_uiState`, and whichever finishes last wins, regardless of which one matches what's actually in the search box. You search for "kotlin", catch a glimpse of results for "kotl", and have no idea why.
 
-What makes this hard to spot is that the call site lies. `loadRepositories(query)` reads like ordinary work happening inside the collector, so you'd assume it's a child of the coroutine running `collectLatest` and dies with it. But the `viewModelScope.launch` buried inside attaches the work to `viewModelScope` instead — making it a *sibling* of the collector, not a child. Cancellation only flows downward, parent to child. `collectLatest` can cancel its own children all it likes; this coroutine isn't one of them.
+What makes this hard to spot is that the call site lies. `loadRepositories(query)` reads like ordinary work happening inside the collector, so you'd assume it's a child of the coroutine running `collectLatest` and dies with it. But the `viewModelScope.launch` buried inside attaches the work to `viewModelScope` instead — making it a _sibling_ of the collector, not a child. Cancellation only flows downward, parent to child. `collectLatest` can cancel its own children all it likes; this coroutine isn't one of them.
 
 This is the hierarchy from the last section, quietly subverted. Structured concurrency works because the Job tree mirrors the shape of your code — right up until a function reaches into some other scope and launches there, at which point the tree and the code stop agreeing.
 

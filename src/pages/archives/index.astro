@@ -14,7 +14,10 @@ if (!SITE.showArchives) {
 }
 
 const showDrafts = !!import.meta.env.SHOW_DRAFTS;
-const posts = await getCollection("blog", ({ data }) => showDrafts || !data.draft);
+const posts = await getCollection(
+  "blog",
+  ({ data }) => showDrafts || !data.draft
+);
 
 const months = [
   "January",

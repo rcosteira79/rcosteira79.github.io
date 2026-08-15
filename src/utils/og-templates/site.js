@@ -1,117 +1,102 @@
 import satori from "satori";
 import { SITE } from "@/config";
 import loadGoogleFonts from "../loadGoogleFont";
+import { COLORS, getProfileImage } from "./shared";
 
 export default async () => {
+  const domain = new URL(SITE.website).hostname.toUpperCase();
+
   return satori(
     {
       type: "div",
       props: {
         style: {
-          background: "#fefbfb",
           width: "100%",
           height: "100%",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
+          padding: "72px",
+          background: COLORS.background,
+          color: COLORS.foreground,
+          borderBottom: `14px solid ${COLORS.accent}`,
         },
         children: [
           {
             type: "div",
             props: {
               style: {
-                position: "absolute",
-                top: "-1px",
-                right: "-1px",
-                border: "4px solid #000",
-                background: "#ecebeb",
-                opacity: "0.9",
-                borderRadius: "4px",
                 display: "flex",
-                justifyContent: "center",
-                margin: "2.5rem",
-                width: "88%",
-                height: "80%",
+                flexDirection: "column",
+                // 1200 - 144 (padding) - 340 (photo) - 64 (gap)
+                width: "652px",
+                marginRight: "64px",
               },
+              children: [
+                {
+                  type: "span",
+                  props: {
+                    style: {
+                      fontSize: 24,
+                      fontWeight: 700,
+                      letterSpacing: "4px",
+                      color: COLORS.accent,
+                    },
+                    children: domain,
+                  },
+                },
+                {
+                  type: "span",
+                  props: {
+                    style: {
+                      fontSize: 76,
+                      fontWeight: 700,
+                      lineHeight: 1.1,
+                      marginTop: "24px",
+                    },
+                    children: SITE.title,
+                  },
+                },
+                {
+                  type: "div",
+                  props: {
+                    style: {
+                      display: "flex",
+                      width: "96px",
+                      height: "6px",
+                      borderRadius: "3px",
+                      background: COLORS.accent,
+                      marginTop: "28px",
+                    },
+                  },
+                },
+                {
+                  type: "span",
+                  props: {
+                    style: {
+                      fontSize: 30,
+                      lineHeight: 1.45,
+                      color: COLORS.muted,
+                      marginTop: "28px",
+                    },
+                    children: SITE.desc,
+                  },
+                },
+              ],
             },
           },
           {
-            type: "div",
+            type: "img",
             props: {
+              src: getProfileImage(),
+              width: 340,
+              height: 340,
               style: {
-                border: "4px solid #000",
-                background: "#fefbfb",
-                borderRadius: "4px",
-                display: "flex",
-                justifyContent: "center",
-                margin: "2rem",
-                width: "88%",
-                height: "80%",
-              },
-              children: {
-                type: "div",
-                props: {
-                  style: {
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    margin: "20px",
-                    width: "90%",
-                    height: "90%",
-                  },
-                  children: [
-                    {
-                      type: "div",
-                      props: {
-                        style: {
-                          display: "flex",
-                          flexDirection: "column",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          height: "90%",
-                          maxHeight: "90%",
-                          overflow: "hidden",
-                          textAlign: "center",
-                        },
-                        children: [
-                          {
-                            type: "p",
-                            props: {
-                              style: { fontSize: 72, fontWeight: "bold" },
-                              children: SITE.title,
-                            },
-                          },
-                          {
-                            type: "p",
-                            props: {
-                              style: { fontSize: 28 },
-                              children: SITE.desc,
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    {
-                      type: "div",
-                      props: {
-                        style: {
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          width: "100%",
-                          marginBottom: "8px",
-                          fontSize: 28,
-                        },
-                        children: {
-                          type: "span",
-                          props: {
-                            style: { overflow: "hidden", fontWeight: "bold" },
-                            children: new URL(SITE.website).hostname,
-                          },
-                        },
-                      },
-                    },
-                  ],
-                },
+                width: "340px",
+                height: "340px",
+                flexShrink: 0,
+                borderRadius: "28px",
+                objectFit: "cover",
+                border: `6px solid ${COLORS.border}`,
               },
             },
           },
@@ -122,7 +107,7 @@ export default async () => {
       width: 1200,
       height: 630,
       embedFont: true,
-      fonts: await loadGoogleFonts(SITE.title + SITE.desc + SITE.website),
+      fonts: await loadGoogleFonts(SITE.title + SITE.desc + domain),
     }
   );
 };

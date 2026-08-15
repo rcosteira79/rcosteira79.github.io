@@ -12,7 +12,7 @@ draft: false
 socialPost: "Wrote a small blog post about a very annoying issue I encountered some time ago, related to image loading with Coil and a very nitpicky image domain 😄 read about it here 👉 {url}"
 ---
 
-One of those bugs where the error message looks you in the eye and tells you to go f* yourself.
+One of those bugs where the error message looks you in the eye and tells you to go f\* yourself.
 
 ## The Problem
 
@@ -22,7 +22,7 @@ For this new feature I was building, images from a specific domain had to load a
 CertPathValidatorException: Trust anchor for certification path not found.
 ```
 
-For the uninitiated: a *trust anchor* is a root certificate that your device inherently trusts — the starting point of the certificate chain that Android uses to verify a server is who it claims to be. This error is Android's way of saying "I tried to validate this server's identity and couldn't establish a trusted chain." It's a real and common error class. It typically means the certificate is self-signed, the chain is broken, something's expired, or the app's network security config is missing something.
+For the uninitiated: a _trust anchor_ is a root certificate that your device inherently trusts — the starting point of the certificate chain that Android uses to verify a server is who it claims to be. This error is Android's way of saying "I tried to validate this server's identity and couldn't establish a trusted chain." It's a real and common error class. It typically means the certificate is self-signed, the chain is broken, something's expired, or the app's network security config is missing something.
 
 None of those were the problem. But I didn't know that yet, and the error message made absolutely sure I wouldn't figure it out quickly.
 
@@ -30,13 +30,13 @@ None of those were the problem. But I didn't know that yet, and the error messag
 
 I checked the network security config — everything looked fine. With a release very close and the error still unexplained, the team went with the fastest thing that worked: the backend added a fallback field to one of our API responses, an alternate image URL for the same image on a different domain that always loaded. Problem "solved." Except this was the kind of solution that eventually bites you in the rear: a workaround maintained across multiple teams, indefinitely, until everyone forgets why it's there and/or it becomes an issue in the future[^1] — in this case, with two sources of truth for the same data, it was a matter of time until someone forgot to update both fields when changing images.
 
-Some time after the release, I found the time to come back to it. This time I went deeper: checked every certificate in the chain — all valid, not expired, properly chained. Tried certificate pinning. Tried passing a custom OkHttp instance into Coil, since it creates its own by default and I wanted to rule out any quirk in how it was being initialised. Added extra logging. At one point I even spun up a brand new, empty Android project (with and without `network_security_config.xml` properly configured) that did nothing but try to load the image — no existing configuration, no layers of abstraction, just Coil and a URL. Still nothing. And yes, I did try other URLs in this new app to make sure it worked. 
+Some time after the release, I found the time to come back to it. This time I went deeper: checked every certificate in the chain — all valid, not expired, properly chained. Tried certificate pinning. Tried passing a custom OkHttp instance into Coil, since it creates its own by default and I wanted to rule out any quirk in how it was being initialised. Added extra logging. At one point I even spun up a brand new, empty Android project (with and without `network_security_config.xml` properly configured) that did nothing but try to load the image — no existing configuration, no layers of abstraction, just Coil and a URL. Still nothing. And yes, I did try other URLs in this new app to make sure it worked.
 
-The iOS and web parity made a certificate explanation hard to fully accept — if the chain were genuinely broken, it would have broken all platforms equally. So I kept at it. There may or may not have been tears at this point. 
+The iOS and web parity made a certificate explanation hard to fully accept — if the chain were genuinely broken, it would have broken all platforms equally. So I kept at it. There may or may not have been tears at this point.
 
 ## The Glide Experiment
 
-Extremely close to giving up, and completely out of ideas, I had one last-ditch effort: *what if I try Glide?*
+Extremely close to giving up, and completely out of ideas, I had one last-ditch effort: _what if I try Glide?_
 
 [Glide](https://bumptech.github.io/glide/) is another image loading library for Android — same idea as Coil, different choices under the hood. It was simple to swap between them since we use Glide for our View-based screens.
 
@@ -78,7 +78,7 @@ val imageLoader = ImageLoader.Builder(context)
     .build()
 ```
 
-The problem is that most projects already have an OkHttp instance in production — loaded up with interceptors, timeouts, auth headers, and years of accumulated configuration. Passing *that* into Coil means threading it through as a dependency, which is messy. And creating a fresh instance just for Coil, like I tried while debugging, isn't great either: OkHttp instances aren't cheap, since they manage their own thread pool and connection pool.
+The problem is that most projects already have an OkHttp instance in production — loaded up with interceptors, timeouts, auth headers, and years of accumulated configuration. Passing _that_ into Coil means threading it through as a dependency, which is messy. And creating a fresh instance just for Coil, like I tried while debugging, isn't great either: OkHttp instances aren't cheap, since they manage their own thread pool and connection pool.
 
 **Option 2: add the header at the request level.** Coil's `ImageRequest.Builder` exposes `addHeader()`, which injects the header into the individual HTTP request that Coil passes to its internal OkHttp instance. No client configuration needed. I wrapped this in a thin builder so callers don't have to remember to add it manually:
 

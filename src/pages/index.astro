@@ -27,7 +27,9 @@ const recentPosts = sortedPosts.filter(
   <Header />
   <main id="main-content" data-layout="index" class="app-layout">
     <section id="hero" class:list={["pt-8 pb-6", "border-b border-border"]}>
-      <div class="flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:justify-between">
+      <div
+        class="flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:justify-between"
+      >
         <div class="flex-1">
           <h1 class="my-4 inline-block text-4xl font-bold sm:my-8 sm:text-5xl">
             Ricardo Costeira
@@ -71,7 +73,7 @@ const recentPosts = sortedPosts.filter(
             alt="Ricardo Costeira"
             class="h-48 w-48 rounded-full object-cover ring-2 ring-accent"
           />
-          <figcaption class="text-xs text-muted-foreground">
+          <figcaption class="text-muted-foreground text-xs">
             I have no idea what I'm doing
           </figcaption>
         </figure>
