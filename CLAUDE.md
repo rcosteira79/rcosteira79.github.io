@@ -18,7 +18,7 @@ pnpm format:check   # Prettier check (run before pushing; CI enforces this)
 pnpm format         # Prettier auto-fix
 ```
 
-Node is managed via nvm. If commands fail, run `source ~/.nvm/nvm.sh` first (or add it to your shell profile).
+Node, npm, and pnpm are installed via Homebrew. If `pnpm` is missing, install it with `brew install pnpm`.
 
 ## Writing Posts
 
