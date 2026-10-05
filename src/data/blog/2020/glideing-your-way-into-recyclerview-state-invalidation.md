@@ -27,7 +27,7 @@ The second one is trickier. It's not only a matter of setting up the `Adapter` b
 
 The solution here is simple: just cache the data. For example, if you have all the data cached in a `LiveData`, something like this will work:
 
-```Kotlin
+```kotlin
 override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
@@ -96,7 +96,7 @@ At a first glance, you probably won't see anything unusual. And there isn't! It'
 
 The images that feed the `RecyclerView` come from an image API. The images are random, and are loaded by **Glide**. Here's the extension function for image loading:
 
-```Kotlin
+```kotlin
 fun ImageView.load(imageAddress: String) {
   Glide.with(this)
       .load(imageAddress)
@@ -132,7 +132,7 @@ Uff! How can you solve this then? There are a few options. You can:
 
 - Override the view size with Glide
 
-```Kotlin
+```kotlin
 fun ImageView.load(imageAddress: String) {
   Glide.with(this)
       .load(imageAddress)
@@ -143,7 +143,7 @@ fun ImageView.load(imageAddress: String) {
 
 - Add a placeholder with Glide, so that the `RecyclerView` uses its height
 
-```Kotlin
+```kotlin
 fun ImageView.load(imageAddress: String) {
   Glide.with(this)
       .load(imageAddress)

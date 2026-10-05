@@ -39,7 +39,7 @@ To fetch the users we need to contact the Github API. However, some of the infor
 
 Given this, the app has the following Retrofit API:
 
-```Kotlin
+```kotlin
 interface Api {
   @GET("users")
   fun getAllUsers(): Maybe<List<GithubUser>>
@@ -51,7 +51,7 @@ interface Api {
 
 Yes, I could use `Observable` instead of `Maybe` here, but `Maybe` makes more _semantic_ meaning to me: maybe I'll get the response I expect, or maybe I won't. Still, `getAllUsers` returns a `List<GithubUser>` stream, and we need to operate on each individual user. So the **repository** converts this stream into an `Observable` stream of `GithubUser`. The other stream remains the same:
 
-```Kotlin
+```kotlin
 override fun getUsersFromApi(): Observable<User> {
   return api.getAllUsers() // returns Maybe for semantic purposes - one possible response on each request.
     .flattenAsObservable { it } // However, we need to transform each element of the list
@@ -68,7 +68,7 @@ Following Clean Architecture, I have `UseCase` classes connecting the `ViewModel
 
 The API is ready, and the repository is ready. Now we just need to make the call in the `ViewModel`, and subscribe to it:
 
-```Kotlin
+```kotlin
 // Gets users from the api and stores them in the database
 private fun updateCache() {
   getUsersFromApiAsSingle()
@@ -91,7 +91,7 @@ private fun getUsersFromApiAsSingle(): Single<List<DetailedUser>> {
 
 I'm going to pretend I don't have all these layers and boundaries for a second, so that the whole process is easier to visualize:
 
-```Kotlin
+```kotlin
 api.getAllUsers() // returns Maybe for semantic purposes - one possible response on each request.
   .flattenAsObservable { it } // However, we need to transform each element of the list
   .map { userMapper.mapToEntity(it) }
@@ -132,13 +132,13 @@ Coroutines are executed in threads. These threads come from thread pools managed
 
 I mentioned `Continuation` before. This happens to be one of the most important aspects about coroutines, if not the most important. Kotlin coroutines implement what is called a **continuation passing style**. Whenever you write a **suspendable function** (you've probably seen `suspend fun` written somewhere by now), you're letting Kotlin know that this function is to be executed in a coroutine. Why? Because under the hood, the compiler translates the `suspend fun` to a function that receives a `Continuation` as a parameter! So, when you write something like this
 
-```Kotlin
+```kotlin
 suspend fun login(user: User): Token { ... }
 ```
 
 It gets decompiled to something similar to
 
-```Java
+```java
 Object login(User user, Continuation<Token> continuation) { ... }
 ```
 
@@ -150,7 +150,7 @@ Ok, you're still reading. I know this is a lot, but hopefully it'll help you und
 
 Retrofit has native support for coroutines, so the first step is to add the `suspend` keyword to the methods and change their return parameters:
 
-```Kotlin
+```kotlin
 @GET("users")
 suspend fun getAllUsers(): List<GithubUser>
 
@@ -160,7 +160,7 @@ suspend fun getUserDetails(@Path("username") username: String): GithubDetailedUs
 
 Easy enough. Now, propagate the same changes to the repository:
 
-```Kotlin
+```kotlin
 override suspend fun getUsersFromApi(): List<User> {
   return api.getAllUsers()
     .map { userMapper.mapToEntity(it) }
@@ -176,7 +176,7 @@ It's not that different from what we had before. We're still just mapping the da
 
 Next up is the `ViewModel`. Here is where the differences are noticeable:
 
-```Kotlin
+```kotlin
 private fun updateCacheWithCoroutines() {
   // I don't like try-catch. So we're using an exception handler instead
   val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
@@ -215,7 +215,7 @@ Before I start explaining what's happening here, there are a few keypoints that 
 
 Back to the code. Like I did with the RxJava version, I'm going to pretend that there are no layers and join the whole thing:
 
-```Kotlin
+```kotlin
 // I don't like try-catch. So we're using an exception handler instead
 val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
   handleErrors(throwable)
