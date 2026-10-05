@@ -5,11 +5,12 @@
 //   node scripts/share-post.mjs <file1.md> [file2.md] ...   (adds to Buffer queue)
 //   node scripts/share-post.mjs --now <file1.md> ...         (publishes immediately)
 //   node scripts/share-post.mjs --schedule <file1.md> ...    (schedules 7 days out, for testing)
+//   node scripts/share-post.mjs --at=<ISO datetime> <file1.md> ...  (schedules at a custom time)
 //   node scripts/share-post.mjs --dry-run <file1.md> ...
 //
 // Environment variables:
 //   BUFFER_API_TOKEN  — required (unless --dry-run)
-//   SITE_URL          — defaults to https://rcosteira79.github.io
+//   SITE_URL          — defaults to https://ricardocosteira.dev
 
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -18,6 +19,7 @@ import { resolve, dirname, join, relative } from "node:path";
 const DRY_RUN = process.argv.includes("--dry-run");
 const SHARE_NOW = process.argv.includes("--now");
 const SCHEDULE = process.argv.includes("--schedule");
+const SHARE_AT = process.argv.find(a => a.startsWith("--at="))?.slice("--at=".length);
 const BUFFER_API_TOKEN = process.env.BUFFER_API_TOKEN;
 const SITE_URL = (process.env.SITE_URL ?? "https://ricardocosteira.dev").replace(/\/$/, "");
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -107,12 +109,15 @@ async function fetchBufferChannelIds(token) {
   return channelData.channels.map(c => c.id);
 }
 
-async function postToBuffer(token, channelIds, text, { now = false, schedule = false } = {}) {
+async function postToBuffer(token, channelIds, text, { now = false, schedule = false, at } = {}) {
   let mode = "addToQueue";
   let dueAt;
 
   if (now) {
     mode = "shareNow";
+  } else if (at) {
+    mode = "customScheduled";
+    dueAt = at.toISOString();
   } else if (schedule) {
     mode = "customScheduled";
     dueAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -152,6 +157,17 @@ async function main() {
   if (files.length === 0) {
     console.log("No new posts to share.");
     return;
+  }
+
+  let shareAt;
+  if (SHARE_AT !== undefined) {
+    shareAt = new Date(SHARE_AT);
+    if (Number.isNaN(shareAt.getTime())) {
+      throw new Error(`Invalid --at value: "${SHARE_AT}". Use an ISO datetime, e.g. 2026-10-05T19:00:00+02:00.`);
+    }
+    if (shareAt.getTime() <= Date.now()) {
+      throw new Error(`--at must be in the future: ${shareAt.toISOString()}`);
+    }
   }
 
   const template = readSocialTemplate();
@@ -198,10 +214,13 @@ async function main() {
     if (DRY_RUN) {
       console.log(`\n[DRY RUN] File: ${file}`);
       console.log(`Message:\n---\n${message}\n---`);
+      if (shareAt) console.log(`Would schedule for ${shareAt.toISOString()}`);
     } else {
-      await postToBuffer(BUFFER_API_TOKEN, channelIds, message, { now: SHARE_NOW, schedule: SCHEDULE });
+      await postToBuffer(BUFFER_API_TOKEN, channelIds, message, { now: SHARE_NOW, schedule: SCHEDULE, at: shareAt });
       if (SHARE_NOW) {
         console.log(`✓ Published immediately to Buffer: "${fm.title}"`);
+      } else if (shareAt) {
+        console.log(`✓ Scheduled on Buffer for ${shareAt.toISOString()}: "${fm.title}"`);
       } else if (SCHEDULE) {
         console.log(`✓ Scheduled on Buffer (7 days out): "${fm.title}"`);
       } else {
